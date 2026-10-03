@@ -1,0 +1,1952 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phiếu học tập tương tác: Liên kết Hydrogen & Tương tác van der Waals</title>
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --secondary: #4f46e5;
+      --accent: #06b6d4;
+      --bg-page: #f8fafc;
+      --surface: #ffffff;
+      --border: #e2e8f0;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --correct: #16a34a;
+      --correct-bg: #f0fdf4;
+      --wrong: #dc2626;
+      --wrong-bg: #fef2f2;
+      --warn: #d97706;
+      --warn-bg: #fffbeb;
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 16px;
+      --shadow: 0 4px 6px -1px rgba(0,0,0,0.07), 0 2px 4px -2px rgba(0,0,0,0.05);
+      --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -4px rgba(0,0,0,0.08);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif; }
+    body { background: var(--bg-page); color: var(--text-main); line-height: 1.6; padding-bottom: 90px; padding-top: 54px; }
+
+    .sticky-timer-bar {
+      position: fixed; top: 0; left: 0; width: 100%;
+      background: #0f172a; color: #ffffff;
+      padding: 8px 16px; display: flex; justify-content: center; align-items: center; gap: 16px;
+      font-size: 0.95rem; font-weight: 600; z-index: 1000;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.25);
+    }
+    .timer-display {
+      background: #1e293b; padding: 3px 12px; border-radius: 6px;
+      font-family: 'Courier New', monospace; font-size: 1.1rem; color: #38bdf8;
+      border: 1px solid #334155;
+    }
+    .timer-status { font-size: 0.8rem; padding: 2px 10px; border-radius: 999px; }
+    .status-ready { background: #64748b; color: #fff; }
+    .status-running { background: #16a34a; color: #fff; animation: pulse 1.5s infinite; }
+    .status-paused { background: #d97706; color: #fff; }
+    .status-submitted { background: #2563eb; color: #fff; }
+    @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.55; } 100% { opacity: 1; } }
+
+    .container { max-width: 960px; margin: 0 auto; padding: 20px 16px; }
+
+    .sheet-header {
+      background: linear-gradient(135deg, #1e40af 0%, #3b82f6 50%, #4338ca 100%);
+      color: #ffffff; padding: 32px 24px; border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-lg); margin-bottom: 24px; position: relative; overflow: hidden;
+    }
+    .badge-chem {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(4px);
+      padding: 5px 14px; border-radius: 999px; font-size: 0.85rem; font-weight: 700;
+      text-transform: uppercase; margin-bottom: 12px; letter-spacing: 0.05em;
+    }
+    .cloud-connected-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: rgba(16, 185, 129, 0.25); border: 1px solid rgba(52, 211, 153, 0.4);
+      padding: 4px 12px; border-radius: 999px; font-size: 0.8rem; font-weight: 600;
+      color: #a7f3d0; margin-left: 8px;
+    }
+    .sheet-title { font-size: 1.85rem; font-weight: 800; line-height: 1.3; margin-bottom: 8px; }
+    .sheet-subtitle { font-size: 1rem; opacity: 0.95; margin-bottom: 20px; }
+
+    .student-card {
+      background: rgba(255, 255, 255, 0.15); border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: var(--radius-md); padding: 16px;
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px;
+    }
+    .input-group label { display: block; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; margin-bottom: 4px; color: #f1f5f9; }
+    .input-group input {
+      width: 100%; padding: 10px 14px; border-radius: 6px; border: none;
+      background: #ffffff; color: var(--text-main); font-size: 0.95rem; font-weight: 500; outline: none;
+      transition: box-shadow 0.2s;
+    }
+    .input-group input:focus { box-shadow: 0 0 0 3px rgba(147, 197, 253, 0.6); }
+
+    .info-card {
+      background: var(--surface); border-radius: var(--radius-md); padding: 18px 22px;
+      margin-bottom: 24px; border-left: 5px solid var(--primary); box-shadow: var(--shadow);
+    }
+    .info-title { font-size: 1.05rem; font-weight: 700; color: var(--primary); margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+    .info-list { padding-left: 20px; color: var(--text-muted); font-size: 0.95rem; }
+    .info-list li { margin-bottom: 4px; }
+
+    .part-section {
+      background: var(--surface); border-radius: var(--radius-lg); box-shadow: var(--shadow);
+      padding: 24px; margin-bottom: 28px; border: 1px solid var(--border);
+    }
+    .part-header {
+      border-bottom: 2px solid #f1f5f9; padding-bottom: 14px; margin-bottom: 20px;
+      display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;
+    }
+    .part-title { font-size: 1.25rem; font-weight: 800; color: #1e3a8a; display: flex; align-items: center; gap: 10px; }
+    .part-badge { background: #e0f2fe; color: #0369a1; padding: 4px 12px; border-radius: 999px; font-size: 0.85rem; font-weight: 700; }
+
+    .q-card {
+      background: #ffffff; border: 1px solid #edf2f7; border-radius: var(--radius-md);
+      padding: 18px 20px; margin-bottom: 18px; transition: all 0.2s ease;
+    }
+    .q-card:hover { border-color: #cbd5e1; box-shadow: 0 4px 12px rgba(0,0,0,0.04); }
+    .q-card.status-correct { border-left: 5px solid var(--correct); background: var(--correct-bg); }
+    .q-card.status-wrong { border-left: 5px solid var(--wrong); background: var(--wrong-bg); }
+    .q-card.status-unanswered { border-left: 5px solid var(--warn); background: var(--warn-bg); }
+
+    .q-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .q-number { font-weight: 700; color: var(--primary); font-size: 1rem; }
+    .q-status-badge { font-size: 0.8rem; font-weight: 700; padding: 3px 8px; border-radius: 4px; }
+    .badge-c { background: #dcfce7; color: var(--correct); }
+    .badge-w { background: #fee2e2; color: var(--wrong); }
+    .badge-u { background: #fef3c7; color: var(--warn); }
+
+    .q-text { font-size: 1rem; color: var(--text-main); line-height: 1.6; margin-bottom: 14px; white-space: pre-wrap; }
+
+    .q-image-container {
+      margin: 12px 0; text-align: center; background: #f8fafc;
+      border-radius: 8px; padding: 10px; border: 1px dashed #cbd5e1;
+    }
+    .q-image-container img, .q-image-container svg { max-width: 100%; max-height: 320px; height: auto; border-radius: 6px; }
+
+    /* Multiple choice options */
+    .options-grid { display: grid; grid-template-columns: 1fr; gap: 8px; }
+    @media(min-width: 640px) { .options-grid.cols-2 { grid-template-columns: 1fr 1fr; } }
+    .opt-label {
+      display: flex; flex-direction: column; background: #f8fafc; border: 1px solid var(--border);
+      padding: 10px 14px; border-radius: 8px; cursor: pointer; transition: all 0.15s ease; user-select: none;
+    }
+    .opt-content-row { display: flex; align-items: center; gap: 12px; width: 100%; }
+    .opt-label:hover { background: #f1f5f9; border-color: #94a3b8; }
+    .opt-label input[type="radio"] { accent-color: var(--primary); width: 18px; height: 18px; }
+    .opt-label.selected { background: #eff6ff; border-color: var(--primary); font-weight: 600; }
+    .opt-img-thumb { margin-top: 6px; max-height: 90px; max-width: 100%; border-radius: 4px; border: 1px solid #cbd5e1; object-fit: contain; }
+
+    /* True/False table */
+    .tf-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    .tf-row { border-bottom: 1px solid var(--border); }
+    .tf-row:last-child { border-bottom: none; }
+    .tf-content { padding: 10px 8px; font-size: 0.95rem; vertical-align: middle; }
+    .tf-actions { padding: 10px 8px; width: 140px; text-align: right; white-space: nowrap; vertical-align: middle; }
+    .tf-btn-group { display: inline-flex; border-radius: 6px; overflow: hidden; border: 1px solid #cbd5e1; }
+    .tf-btn { border: none; background: #ffffff; padding: 6px 14px; font-size: 0.85rem; font-weight: 700; cursor: pointer; color: var(--text-muted); }
+    .tf-btn:hover { background: #f1f5f9; }
+    .tf-btn.active-true { background: #16a34a; color: #ffffff; }
+    .tf-btn.active-false { background: #dc2626; color: #ffffff; }
+
+    /* Short answers */
+    .short-input-box { display: flex; gap: 10px; align-items: center; margin-top: 10px; }
+    .short-input {
+      flex: 1; max-width: 320px; padding: 9px 14px; font-size: 0.95rem;
+      border: 1.5px solid var(--border); border-radius: 8px; outline: none;
+    }
+    .short-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37,99,235,0.15); }
+
+    .feedback-box { margin-top: 10px; padding: 8px 12px; border-radius: 6px; font-size: 0.9rem; display: flex; align-items: center; gap: 8px; }
+    .feedback-correct { background: #dcfce7; color: #15803d; }
+    .feedback-wrong { background: #fee2e2; color: #b91c1c; }
+    .feedback-unanswered { background: #fef3c7; color: #b45309; }
+
+    .submit-bar { text-align: center; margin: 36px 0; }
+    .btn-submit {
+      background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); color: #ffffff;
+      font-size: 1.15rem; font-weight: 700; padding: 14px 44px; border: none; border-radius: 999px;
+      box-shadow: 0 10px 20px -5px rgba(37,99,235,0.4); cursor: pointer; transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 12px 24px -5px rgba(37,99,235,0.5); }
+    .btn-submit:disabled { background: #94a3b8; cursor: not-allowed; transform: none; box-shadow: none; }
+
+    .sync-status-card {
+      margin-top: 16px; padding: 12px 18px; border-radius: 8px; font-size: 0.92rem;
+      display: inline-flex; align-items: center; gap: 10px; border: 1px solid transparent;
+      animation: fadeIn 0.3s ease;
+    }
+    .sync-loading { background: #eff6ff; color: #1d4ed8; border-color: #bfdbfe; }
+    .sync-success { background: #f0fdf4; color: #15803d; border-color: #bbf7d0; }
+    .sync-error { background: #fef2f2; color: #b91c1c; border-color: #fecaca; }
+
+    .result-panel {
+      background: #ffffff; border-radius: var(--radius-lg); border: 2px solid var(--primary);
+      padding: 28px; box-shadow: var(--shadow-lg); margin-bottom: 30px; display: none; animation: fadeIn 0.3s ease;
+    }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .score-badge { font-size: 3.2rem; font-weight: 900; color: var(--primary); text-align: center; line-height: 1; margin-bottom: 4px; }
+    .score-label { text-align: center; color: var(--text-muted); font-size: 0.95rem; margin-bottom: 16px; }
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; margin-bottom: 20px; }
+    .stat-box { padding: 12px; border-radius: 8px; text-align: center; }
+    .stat-box.c { background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; }
+    .stat-box.w { background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; }
+    .stat-box.u { background: #fffbeb; border: 1px solid #fde68a; color: #92400e; }
+    .stat-num { font-size: 1.5rem; font-weight: 800; }
+    .stat-text { font-size: 0.8rem; font-weight: 700; text-transform: uppercase; }
+
+    .memo-card { background: #faf5ff; border: 1px solid #e9d5ff; border-radius: var(--radius-md); padding: 20px; margin-top: 24px; }
+    .memo-title { font-size: 1.05rem; font-weight: 700; color: #6b21a8; margin-bottom: 10px; }
+    .memo-list { padding-left: 20px; color: #4c1d95; font-size: 0.95rem; }
+    .memo-list li { margin-bottom: 6px; }
+
+    .admin-float-btn {
+      position: fixed; bottom: 24px; right: 24px; background: #0f172a; color: #ffffff;
+      padding: 12px 20px; border-radius: 999px; box-shadow: 0 6px 16px rgba(0,0,0,0.3);
+      border: 1px solid #334155; font-size: 0.95rem; font-weight: 700; cursor: pointer;
+      display: flex; align-items: center; gap: 8px; z-index: 99; transition: transform 0.15s, background 0.15s;
+    }
+    .admin-float-btn:hover { background: #1e293b; transform: translateY(-2px); }
+
+    .modal-backdrop {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(4px);
+      display: none; align-items: center; justify-content: center; z-index: 2000; padding: 16px;
+    }
+    .modal-box {
+      background: #ffffff; width: 100%; max-width: 920px; max-height: 90vh;
+      border-radius: var(--radius-lg); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+      display: flex; flex-direction: column; overflow: hidden;
+    }
+    .modal-header { background: #0f172a; color: #ffffff; padding: 18px 24px; display: flex; justify-content: space-between; align-items: center; }
+    .modal-title { font-size: 1.2rem; font-weight: 700; }
+    .modal-close { background: transparent; border: none; color: #94a3b8; font-size: 1.5rem; cursor: pointer; }
+    .modal-close:hover { color: #ffffff; }
+    .modal-body { padding: 24px; overflow-y: auto; flex: 1; }
+    .modal-footer { background: #f8fafc; padding: 16px 24px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 12px; }
+
+    .admin-tabs { display: flex; border-bottom: 2px solid #e2e8f0; margin-bottom: 20px; gap: 8px; }
+    .tab-btn {
+      padding: 8px 16px; background: transparent; border: none; border-bottom: 3px solid transparent;
+      font-size: 0.95rem; font-weight: 700; color: var(--text-muted); cursor: pointer;
+    }
+    .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
+
+    .admin-toolbar { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 16px; background: #f1f5f9; padding: 12px; border-radius: 8px; }
+    .admin-search-input { flex: 1; min-width: 200px; padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.9rem; }
+    .admin-filter-select { padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.9rem; background: #ffffff; }
+
+    .editor-q-card { background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; padding: 16px; margin-bottom: 16px; }
+    .editor-label { display: block; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-top: 8px; margin-bottom: 4px; }
+    .editor-input, .editor-textarea { width: 100%; padding: 8px 10px; font-size: 0.95rem; border: 1px solid var(--border); border-radius: 6px; background: #ffffff; }
+    .editor-textarea { resize: vertical; min-height: 50px; }
+
+    .btn { padding: 8px 16px; border-radius: 6px; border: none; font-size: 0.9rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-primary:hover { background: var(--primary-dark); }
+    .btn-secondary { background: #e2e8f0; color: var(--text-main); }
+    .btn-secondary:hover { background: #cbd5e1; }
+    .btn-danger { background: #ef4444; color: #fff; }
+    .btn-danger:hover { background: #dc2626; }
+    .btn-success { background: #16a34a; color: #fff; }
+    .btn-success:hover { background: #15803d; }
+
+    .alert-banner { padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; font-size: 0.9rem; display: flex; align-items: center; gap: 8px; }
+    .alert-warning { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
+    .alert-info { background: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe; }
+
+    .key-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+    .key-table th, .key-table td { padding: 8px 10px; border: 1px solid var(--border); text-align: left; }
+    .key-table th { background: #f1f5f9; font-weight: 700; }
+    .key-table tr:nth-child(even) { background: #f8fafc; }
+
+    /* Custom Toast Notification */
+    .custom-toast {
+      position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+      background: #0f172a; color: #ffffff; padding: 12px 24px; border-radius: 999px;
+      font-size: 0.95rem; font-weight: 600; box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+      z-index: 9999; display: flex; align-items: center; gap: 10px; opacity: 0; pointer-events: none;
+      transition: all 0.3s ease;
+    }
+    .custom-toast.show { opacity: 1; transform: translateX(-50%) translateY(-10px); pointer-events: auto; }
+    .toast-success { border-left: 4px solid #22c55e; }
+    .toast-warning { border-left: 4px solid #f59e0b; }
+    .toast-error { border-left: 4px solid #ef4444; }
+
+    @media(max-width: 640px) {
+      .sheet-title { font-size: 1.45rem; }
+      .sheet-header { padding: 20px 16px; }
+      .container { padding: 12px 8px; }
+      .part-section { padding: 16px 12px; }
+      .q-card { padding: 14px 12px; }
+      .admin-float-btn { bottom: 16px; right: 16px; padding: 10px 14px; font-size: 0.85rem; }
+      .tf-table, .tf-table tbody, .tf-row, .tf-content, .tf-actions { display: block; width: 100%; text-align: left; }
+      .tf-actions { padding-top: 0; padding-bottom: 12px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="sticky-timer-bar">
+  <span>⏱️ Thời gian:</span>
+  <span class="timer-display" id="timerClock">00:00:00</span>
+  <span class="timer-status status-ready" id="timerStatus">Sẵn sàng</span>
+</div>
+
+<div class="container">
+  <!-- HEADER -->
+  <header class="sheet-header">
+    <div style="display:flex; align-items:center; flex-wrap:wrap; gap:8px;">
+      <div class="badge-chem">⚗️ HÓA HỌC 10 • CHƯƠNG TRÌNH MỚI</div>
+      <div class="cloud-connected-badge" title="Đã kết nối Google Apps Script">☁️ Google Sheets Connected</div>
+    </div>
+    <h1 class="sheet-title" id="displayHeaderTopic">BÀI TẬP LIÊN KẾT HYDROGEN VÀ TƯƠNG TÁC VAN DER WAALS</h1>
+    <p class="sheet-subtitle">Phiếu học tập tương tác số hóa – Tự động chấm điểm & Lưu trữ tiến trình học tập lên Google Sheets</p>
+
+    <div class="student-card">
+      <div class="input-group">
+        <label for="studentName">Họ và tên học sinh (*):</label>
+        <input type="text" id="studentName" placeholder="Nhập đầy đủ họ và tên..." oninput="handleStudentActivity()">
+      </div>
+      <div class="input-group">
+        <label for="studentClass">Lớp học (*):</label>
+        <input type="text" id="studentClass" placeholder="Ví dụ: 10A1..." oninput="handleStudentActivity()">
+      </div>
+    </div>
+  </header>
+
+  <!-- HƯỚNG DẪN -->
+  <div class="info-card">
+    <div class="info-title">📌 Hướng dẫn làm bài</div>
+    <ul class="info-list">
+      <li>Nhập đầy đủ <strong>Họ tên</strong> và <strong>Lớp</strong> trước khi nộp bài để hệ thống ghi nhận điểm vào sổ điểm lớp.</li>
+      <li>Đồng hồ đếm giờ sẽ tự động bắt đầu ngay khi bạn thao tác và tạm dừng khi bạn chuyển tab hoặc rời khỏi trang.</li>
+      <li>Hoàn thành đầy đủ các phần: <strong>Trắc nghiệm (40 câu)</strong>, <strong>Đúng – Sai (15 câu)</strong> và <strong>Trả lời ngắn (14 câu)</strong>.</li>
+      <li>Nhấn nút <strong>"🚀 NỘP BÀI & CHẤM ĐIỂM"</strong> ở cuối trang để xem điểm số, lời giải chi tiết và đồng bộ kết quả.</li>
+    </ul>
+  </div>
+
+  <!-- RESULT PANEL -->
+  <div id="resultPanel" class="result-panel">
+    <div class="score-badge" id="scoreDisplay">0.0 / 10</div>
+    <div class="score-label" id="scoreText">Tổng điểm bài làm của bạn</div>
+    <div style="text-align:center; margin-bottom: 12px; font-weight:700; color:var(--primary);" id="timeResultDisplay"></div>
+
+    <div class="stats-grid">
+      <div class="stat-box c">
+        <div class="stat-num" id="statCorrect">0</div>
+        <div class="stat-text">Câu đúng</div>
+      </div>
+      <div class="stat-box w">
+        <div class="stat-num" id="statWrong">0</div>
+        <div class="stat-text">Câu sai</div>
+      </div>
+      <div class="stat-box u">
+        <div class="stat-num" id="statUnanswered">0</div>
+        <div class="stat-text">Chưa làm</div>
+      </div>
+    </div>
+
+    <!-- Sync status inside result -->
+    <div style="text-align:center; margin-bottom: 16px;" id="resultSyncWrapper"></div>
+
+    <div style="text-align:center; margin-top:16px;">
+      <button class="btn btn-secondary" onclick="promptResetWorksheet()">🔄 Làm lại bài</button>
+      <button class="btn btn-primary" onclick="window.print()">🖨️ In bài làm / Lưu PDF</button>
+    </div>
+  </div>
+
+  <!-- WORKSHEET CONTAINER -->
+  <div id="worksheetContainer"></div>
+
+  <!-- SUBMIT BAR -->
+  <div class="submit-bar" id="submitSection">
+    <button class="btn-submit" id="btnSubmitWorksheet" onclick="submitWorksheet()">
+      🚀 NỘP BÀI & CHẤM ĐIỂM
+    </button>
+    <div id="submitSyncFeedback" style="display:block; margin-top:12px;"></div>
+  </div>
+
+  <!-- QUICK MEMO -->
+  <div class="memo-card">
+    <div class="memo-title">💡 Ghi nhớ nhanh kiến thức trọng tâm</div>
+    <ul class="memo-list">
+      <li><strong>Liên kết hydrogen:</strong> Liên kết yếu hình thành giữa nguyên tử H linh động (đã liên kết với F, O, N có độ âm điện lớn) với nguyên tử F, O, N khác có cặp electron hóa trị chưa liên kết.</li>
+      <li><strong>Ảnh hưởng tới tính chất vật lý:</strong> Làm tăng đáng kể nhiệt độ nóng chảy, nhiệt độ sôi của các hợp chất như H₂O, HF, NH₃ so với các chất tương đồng.</li>
+      <li><strong>Tương tác van der Waals:</strong> Là lực hút tĩnh điện yếu giữa các phân tử do các lưỡng cực tạm thời và lưỡng cực cảm ứng, tăng theo khối lượng phân tử (số lượng electron).</li>
+    </ul>
+  </div>
+</div>
+
+<!-- FLOATING ADMIN BUTTON -->
+<button class="admin-float-btn" onclick="openAdminModal()">
+  ⚙️ QUẢN TRỊ
+</button>
+
+<!-- CUSTOM TOAST -->
+<div id="customToast" class="custom-toast">
+  <span id="toastIcon">ℹ️</span>
+  <span id="toastMessage">Thông báo</span>
+</div>
+
+<!-- CONFIRMATION MODAL (Replaces window.confirm) -->
+<div id="confirmModal" class="modal-backdrop">
+  <div class="modal-box" style="max-width: 440px;">
+    <div class="modal-header">
+      <div class="modal-title" id="confirmModalTitle">Xác nhận thao tác</div>
+      <button class="modal-close" onclick="closeConfirmModal(false)">&times;</button>
+    </div>
+    <div class="modal-body">
+      <p id="confirmModalMessage" style="font-size: 1rem; color: var(--text-main);"></p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeConfirmModal(false)">Hủy bỏ</button>
+      <button class="btn btn-primary" id="confirmModalAcceptBtn" onclick="closeConfirmModal(true)">Đồng ý</button>
+    </div>
+  </div>
+</div>
+
+<!-- LOGIN MODAL -->
+<div id="loginModal" class="modal-backdrop">
+  <div class="modal-box" style="max-width: 400px;">
+    <div class="modal-header">
+      <div class="modal-title">🔐 Đăng nhập Quản trị</div>
+      <button class="modal-close" onclick="closeLoginModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <label class="editor-label">Mật khẩu giáo viên (mặc định: 1230):</label>
+      <input type="password" id="adminPasswordInput" class="editor-input" placeholder="Nhập mật khẩu..." onkeydown="handleLoginKey(event)">
+      <div id="loginError" style="color:var(--wrong); font-size:0.85rem; margin-top:8px; display:none;">⚠️ Mật khẩu không chính xác!</div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeLoginModal()">Hủy</button>
+      <button class="btn btn-primary" onclick="submitAdminLogin()">Đăng nhập</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN DASHBOARD MODAL -->
+<div id="adminModal" class="modal-backdrop">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="modal-title">⚙️ Bảng Điều Khiển Quản Trị Giáo Viên</div>
+      <button class="modal-close" onclick="closeAdminModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="admin-tabs">
+        <button class="tab-btn active" id="btnTabBank" onclick="switchAdminTab('bank')">📚 Ngân hàng câu hỏi</button>
+        <button class="tab-btn" id="btnTabConfig" onclick="switchAdminTab('config')">⚙️ Cấu hình & Điểm số</button>
+        <button class="tab-btn" id="btnTabCloud" onclick="switchAdminTab('cloud')">☁️ Google Sheets API</button>
+        <button class="tab-btn" id="btnTabKey" onclick="switchAdminTab('key')">🔑 Xem đáp án cả đề</button>
+      </div>
+
+      <!-- TAB 1: NGÂN HÀNG CÂU HỎI -->
+      <div id="adminTabBank">
+        <div class="admin-toolbar">
+          <input type="text" id="adminSearchInput" class="admin-search-input" placeholder="🔎 Tìm kiếm theo số câu, nội dung..." oninput="filterAdminQuestions()">
+          <select id="adminFilterType" class="admin-filter-select" onchange="filterAdminQuestions()">
+            <option value="all">Tất cả các phần</option>
+            <option value="p1">Phần I: Trắc nghiệm (40 câu)</option>
+            <option value="p2">Phần II: Đúng - Sai (15 câu)</option>
+            <option value="p3">Phần III: Trả lời ngắn (14 câu)</option>
+          </select>
+          <button class="btn btn-success" onclick="saveAllQuestionsFromEditor()">💾 LƯU TẤT CẢ CÂU HỎI</button>
+          <button class="btn btn-secondary" onclick="promptRestoreOriginal()">↩ KHÔI PHỤC CÂU GỐC</button>
+        </div>
+        <div id="adminQuestionsList"></div>
+      </div>
+
+      <!-- TAB 2: CẤU HÌNH -->
+      <div id="adminTabConfig" style="display:none;">
+        <div id="scoreWarningBox" class="alert-banner alert-warning" style="display:none;"></div>
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap:16px; margin-bottom:20px;">
+          <div>
+            <label class="editor-label">Tên môn học</label>
+            <input type="text" id="cfgSubject" class="editor-input">
+          </div>
+          <div>
+            <label class="editor-label">Khối / Lớp</label>
+            <input type="text" id="cfgGrade" class="editor-input">
+          </div>
+          <div style="grid-column: 1 / -1;">
+            <label class="editor-label">Tên bài học</label>
+            <input type="text" id="cfgTopic" class="editor-input">
+          </div>
+          <div>
+            <label class="editor-label">Tổng điểm toàn phiếu</label>
+            <input type="number" step="0.5" id="cfgTotalScore" class="editor-input" oninput="validateConfigScores()">
+          </div>
+          <div>
+            <label class="editor-label">Kiểu đánh số thứ tự câu</label>
+            <select id="cfgNumberingMode" class="editor-input">
+              <option value="section">Đánh số riêng từng phần (Câu 1, 2... trong mỗi phần - Đúng gốc)</option>
+              <option value="continuous">Đánh số liên tục cả đề (Câu 1 đến Câu 69)</option>
+            </select>
+          </div>
+        </div>
+
+        <h4 style="margin: 16px 0 10px; color:#1e40af;">Phân bổ thang điểm các phần:</h4>
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap:16px;">
+          <div style="background:#f8fafc; padding:12px; border-radius:8px; border:1px solid #e2e8f0;">
+            <label style="font-weight:700;">Phần I: Trắc nghiệm</label>
+            <div style="margin-top:4px;"><input type="checkbox" id="cfgEnableP1"> Bật phần này</div>
+            <label class="editor-label">Điểm tối đa:</label>
+            <input type="number" step="0.25" id="cfgScoreP1" class="editor-input" oninput="validateConfigScores()">
+          </div>
+          <div style="background:#f8fafc; padding:12px; border-radius:8px; border:1px solid #e2e8f0;">
+            <label style="font-weight:700;">Phần II: Đúng - Sai</label>
+            <div style="margin-top:4px;"><input type="checkbox" id="cfgEnableP2"> Bật phần này</div>
+            <label class="editor-label">Điểm tối đa:</label>
+            <input type="number" step="0.25" id="cfgScoreP2" class="editor-input" oninput="validateConfigScores()">
+          </div>
+          <div style="background:#f8fafc; padding:12px; border-radius:8px; border:1px solid #e2e8f0;">
+            <label style="font-weight:700;">Phần III: Trả lời ngắn</label>
+            <div style="margin-top:4px;"><input type="checkbox" id="cfgEnableP3"> Bật phần này</div>
+            <label class="editor-label">Điểm tối đa:</label>
+            <input type="number" step="0.25" id="cfgScoreP3" class="editor-input" oninput="validateConfigScores()">
+          </div>
+        </div>
+        <div style="margin-top:20px; text-align:right;">
+          <button class="btn btn-primary" onclick="saveConfiguration()">💾 Lưu cấu hình</button>
+        </div>
+      </div>
+
+      <!-- TAB 3: GOOGLE SHEETS API -->
+      <div id="adminTabCloud" style="display:none;">
+        <div class="alert-banner alert-info">
+          🔗 <strong>Google Apps Script Web App Endpoint</strong> đã được kết nối tự động. Khi học sinh bấm nộp bài, toàn bộ dữ liệu gồm: Thời gian nộp, Họ tên, Lớp, Điểm tổng, Số câu đúng/sai, Thời lượng làm bài sẽ được gửi đến Google Sheets.
+        </div>
+
+        <div style="margin-bottom:16px;">
+          <label class="editor-label">Đường dẫn Google Apps Script Web App (URL):</label>
+          <input type="text" id="cfgGasUrl" class="editor-input" style="font-family:monospace; font-size:0.88rem;" value="https://script.google.com/macros/s/AKfycbwPuyPCaXKTccn9kpVDp41G-Fn2eFSJAnzgS1ZKl0QhOzvxIBsuOKVzUO_f79ZiHo_X/exec">
+          <div style="margin-top:8px; display:flex; gap:10px;">
+            <button class="btn btn-primary" onclick="saveGasEndpoint()">💾 Lưu liên kết</button>
+            <button class="btn btn-secondary" onclick="testGasEndpoint()">⚡ Gửi thử bài kiểm tra kết nối</button>
+          </div>
+          <div id="testGasResult" style="margin-top:10px; font-size:0.9rem;"></div>
+        </div>
+
+        <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:16px; margin-top:20px;">
+          <h4 style="color:#0f172a; margin-bottom:8px;">💡 Mã nguồn Google Apps Script mẫu trong Google Sheet (nếu cần tham khảo):</h4>
+          <pre style="background:#1e293b; color:#f8fafc; padding:12px; border-radius:6px; font-size:0.8rem; overflow-x:auto;">
+function doPost(e) {
+  try {
+    var data = JSON.parse(e.postData.contents);
+    var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+    if (sheet.getLastRow() === 0) {
+      sheet.appendRow(["Thời gian", "Họ tên", "Lớp", "Điểm số", "Điểm tối đa", "Đúng", "Sai", "Chưa làm", "Thời lượng", "Chi tiết bài làm"]);
+    }
+    sheet.appendRow([
+      data.timestamp,
+      data.studentName,
+      data.studentClass,
+      data.totalScore,
+      data.maxScore,
+      data.correctCount,
+      data.wrongCount,
+      data.unansweredCount,
+      data.duration,
+      JSON.stringify(data.details || {})
+    ]);
+    return ContentService.createTextOutput(JSON.stringify({status: "success"}))
+      .setMimeType(ContentService.MimeType.JSON);
+  } catch(err) {
+    return ContentService.createTextOutput(JSON.stringify({status: "error", message: err.toString()}))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}
+          </pre>
+        </div>
+      </div>
+
+      <!-- TAB 4: XEM ĐÁP ÁN -->
+      <div id="adminTabAnswerKey" style="display:none;">
+        <div style="margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;">
+          <h3 style="color:#1e3a8a;">Bảng tra đáp án toàn bộ đề thi (Tự động cập nhật)</h3>
+          <button class="btn btn-secondary" onclick="renderAnswerKey()">🔄 Tải lại đáp án</button>
+        </div>
+        <div id="answerKeyContainer" style="max-height: 520px; overflow-y:auto;"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeAdminModal()">Đóng cửa sổ</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const SVG_ICE_CRYSTAL = `<svg viewBox="0 0 400 320" width="100%" height="260" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="gradO" cx="30%" cy="30%" r="70%"><stop offset="0%" stop-color="#60a5fa"/><stop offset="100%" stop-color="#1d4ed8"/></radialGradient>
+    <radialGradient id="gradH" cx="30%" cy="30%" r="70%"><stop offset="0%" stop-color="#ffffff"/><stop offset="100%" stop-color="#94a3b8"/></radialGradient>
+  </defs>
+  <line x1="200" y1="160" x2="200" y2="50" stroke="#0284c7" stroke-width="2.5" stroke-dasharray="5,5"/>
+  <line x1="200" y1="160" x2="80" y2="230" stroke="#0284c7" stroke-width="2.5" stroke-dasharray="5,5"/>
+  <line x1="200" y1="160" x2="320" y2="230" stroke="#0284c7" stroke-width="2.5" stroke-dasharray="5,5"/>
+  <line x1="200" y1="160" x2="160" y2="280" stroke="#0284c7" stroke-width="2.5" stroke-dasharray="5,5"/>
+  <polygon points="200,50 80,230 160,280 320,230" fill="rgba(224,242,254,0.3)" stroke="#38bdf8" stroke-width="1.5"/>
+  <circle cx="200" cy="160" r="16" fill="url(#gradO)"/>
+  <circle cx="188" cy="148" r="7" fill="url(#gradH)"/>
+  <circle cx="212" cy="148" r="7" fill="url(#gradH)"/>
+  <text x="200" y="165" font-size="11" font-weight="bold" fill="#fff" text-anchor="middle">O</text>
+  <circle cx="200" cy="50" r="14" fill="url(#gradO)"/><circle cx="190" cy="40" r="6" fill="url(#gradH)"/><circle cx="210" cy="40" r="6" fill="url(#gradH)"/>
+  <circle cx="80" cy="230" r="14" fill="url(#gradO)"/><circle cx="70" cy="220" r="6" fill="url(#gradH)"/><circle cx="90" cy="220" r="6" fill="url(#gradH)"/>
+  <circle cx="320" cy="230" r="14" fill="url(#gradO)"/><circle cx="310" cy="220" r="6" fill="url(#gradH)"/><circle cx="330" cy="220" r="6" fill="url(#gradH)"/>
+  <circle cx="160" cy="280" r="14" fill="url(#gradO)"/><circle cx="150" cy="270" r="6" fill="url(#gradH)"/><circle cx="170" cy="270" r="6" fill="url(#gradH)"/>
+  <text x="200" y="310" font-size="12" font-weight="bold" fill="#0369a1" text-anchor="middle">Mô hình tứ diện liên kết hydrogen trong mạng tinh thể nước đá</text>
+</svg>`;
+
+const SVG_BOILING_CHART = `<svg viewBox="0 0 540 280" width="100%" height="240" xmlns="http://www.w3.org/2000/svg">
+  <line x1="60" y1="240" x2="500" y2="240" stroke="#475569" stroke-width="2"/>
+  <line x1="60" y1="240" x2="60" y2="20" stroke="#475569" stroke-width="2"/>
+  <text x="50" y="18" font-size="11" font-weight="bold" fill="#1e293b" text-anchor="end">Nhiệt độ sôi (°C)</text>
+  <text x="500" y="260" font-size="11" font-weight="bold" fill="#1e293b" text-anchor="end">Khối lượng phân tử (g/mol) →</text>
+  <line x1="60" y1="60" x2="500" y2="60" stroke="#e2e8f0" stroke-width="1" stroke-dasharray="3,3"/><text x="50" y="64" font-size="10" fill="#64748b" text-anchor="end">100°C</text>
+  <line x1="60" y1="150" x2="500" y2="150" stroke="#e2e8f0" stroke-width="1" stroke-dasharray="3,3"/><text x="50" y="154" font-size="10" fill="#64748b" text-anchor="end">0°C</text>
+  <line x1="60" y1="210" x2="500" y2="210" stroke="#e2e8f0" stroke-width="1" stroke-dasharray="3,3"/><text x="50" y="214" font-size="10" fill="#64748b" text-anchor="end">-100°C</text>
+  <polyline points="100,60 190,195 330,175 460,140" fill="none" stroke="#2563eb" stroke-width="2.5"/>
+  <circle cx="100" cy="60" r="5" fill="#2563eb"/><text x="100" y="50" font-size="11" font-weight="bold" fill="#1d4ed8" text-anchor="middle">H₂O</text>
+  <circle cx="190" cy="195" r="4" fill="#2563eb"/><text x="190" y="210" font-size="10" fill="#1d4ed8" text-anchor="middle">H₂S</text>
+  <circle cx="330" cy="175" r="4" fill="#2563eb"/><text x="330" y="170" font-size="10" fill="#1d4ed8" text-anchor="middle">H₂Se</text>
+  <circle cx="460" cy="140" r="4" fill="#2563eb"/><text x="460" y="132" font-size="10" fill="#1d4ed8" text-anchor="middle">H₂Te</text>
+  <polyline points="110,135 200,205 340,185 470,165" fill="none" stroke="#16a34a" stroke-width="2" stroke-dasharray="4,2"/>
+  <circle cx="110" cy="135" r="4" fill="#16a34a"/><text x="110" y="125" font-size="10" font-weight="bold" fill="#15803d" text-anchor="middle">HF</text>
+  <circle cx="200" cy="205" r="3" fill="#16a34a"/><text x="200" y="222" font-size="9" fill="#15803d" text-anchor="middle">HCl</text>
+  <polyline points="95,175 185,225 325,190 455,155" fill="none" stroke="#9333ea" stroke-width="2"/>
+  <circle cx="95" cy="175" r="4" fill="#9333ea"/><text x="80" y="178" font-size="10" font-weight="bold" fill="#7e22ce" text-anchor="end">NH₃</text>
+  <circle cx="185" cy="225" r="3" fill="#9333ea"/><text x="185" y="240" font-size="9" fill="#7e22ce" text-anchor="middle">PH₃</text>
+</svg>`;
+
+const GAS_ENDPOINT_DEFAULT = "https://script.google.com/macros/s/AKfycbwPuyPCaXKTccn9kpVDp41G-Fn2eFSJAnzgS1ZKl0QhOzvxIBsuOKVzUO_f79ZiHo_X/exec";
+
+const ORIGINAL_DATA = {
+  config: {
+    subject: "Hóa học", grade: "Lớp 10",
+    topic: "BÀI TẬP LIÊN KẾT HYDROGEN VÀ TƯƠNG TÁC VAN DER WAALS",
+    totalScore: 10, numberingMode: "section",
+    enableP1: true, scoreP1: 4.0,
+    enableP2: true, scoreP2: 3.0,
+    enableP3: true, scoreP3: 3.0,
+    gasUrl: GAS_ENDPOINT_DEFAULT
+  },
+  part1: [
+    { id: 1, text: "Hợp chất nào dưới đây tạo được liên kết hydrogen liên phân tử?", options: ["CH₄.", "H₂O.", "PH₃.", "H₂S."], answer: "B", image: null, optionImages: [null,null,null,null] },
+    { id: 2, text: "Sự phân bố electron không đồng đều trong một nguyên tử hay một phân tử hình thành nên", options: ["một ion dương.", "một ion âm.", "một lưỡng cực vĩnh viễn.", "một lưỡng cực tạm thời."], answer: "D", image: null, optionImages: [null,null,null,null] },
+    { id: 3, text: "Khí hiếm nào dưới đây có nhiệt độ sôi thấp nhất?", options: ["Ne.", "Xe.", "Ar.", "Kr."], answer: "A", image: null, optionImages: [null,null,null,null] },
+    { id: 4, text: "Liên kết hydrogen xuất hiện giữa những phân tử cùng loại nào sau đây?", options: ["CH₄.", "NH₃.", "CH₃–O–CH₃.", "PH₃."], answer: "B", image: null, optionImages: [null,null,null,null] },
+    { id: 5, text: "Liên kết hydrogen là loại liên kết hóa học được hình thành giữa các nguyên tử nào sau đây?", options: ["Phi kim và hydrogen trong hai phân tử khác nhau.", "Phi kim và hydrogen trong cùng một phân tử.", "Phi kim có độ âm điện lớn và nguyên tử hydrogen.", "F, O, N,… có độ âm điện lớn, đồng thời có cặp electron hóa trị chưa liên kết và nguyên tử hydrogen linh động."], answer: "D", image: null, optionImages: [null,null,null,null] },
+    { id: 6, text: "Tương tác van der Waals được hình thành do", options: ["tương tác tĩnh điện lưỡng cực – lưỡng cực giữa các nguyên tử.", "tương tác tĩnh điện lưỡng cực – lưỡng cực giữa các phân tử.", "tương tác tĩnh điện lưỡng cực – lưỡng cực giữa các nguyên tử hay phân tử.", "lực hút tĩnh điện giữa các phân tử phân cực."], answer: "C", image: null, optionImages: [null,null,null,null] },
+    { id: 7, text: "Chất nào sau đây có thể tạo liên kết hydrogen?", options: ["PF₃.", "CH₄.", "CH₃OH.", "H₂S."], answer: "C", image: null, optionImages: [null,null,null,null] },
+    { id: 8, text: "Chất nào sau đây không thể tạo được liên kết hydrogen?", options: ["H₂O.", "CH₄.", "CH₃OH.", "NH₃."], answer: "B", image: null, optionImages: [null,null,null,null] },
+    { id: 9, text: "Tương tác van der Waals tồn tại giữa những", options: ["ion.", "hạt proton.", "hạt neutron.", "phân tử."], answer: "D", image: null, optionImages: [null,null,null,null] },
+    { id: 10, text: "Cho các chất sau: F₂, Cl₂, Br₂, I₂. Chất có nhiệt độ nóng chảy thấp nhất là", options: ["F₂.", "Cl₂.", "Br₂.", "I₂."], answer: "A", image: null, optionImages: [null,null,null,null] },
+    { id: 11, text: "Sơ đồ nào sau đây thể hiện đúng liên kết hydrogen giữa 2 phân tử hydrogen fluoride (HF)?", options: ["H–F ... H–F", "H–F ... F–H", "F–H ... F–H", "H–H ... F–F"], answer: "A", image: null, optionImages: [null,null,null,null] },
+    { id: 12, text: "Cho các khí hiếm sau: He, Ne, Ar, Kr, Xe. Khí hiếm có nhiệt độ nóng chảy thấp nhất và cao nhất là", options: ["Xe và He.", "Ar và Ne.", "He và Xe.", "He và Kr."], answer: "C", image: null, optionImages: [null,null,null,null] },
+    { id: 13, text: "Cho các chất sau: C₂H₆, H₂O, NH₃, PF₃, C₂H₅OH. Số chất tạo được liên kết hydrogen là", options: ["2.", "3.", "4.", "5."], answer: "B", image: null, optionImages: [null,null,null,null] },
+    { id: 14, text: "Tương tác van der Waals xuất hiện là do sự hình thành các lưỡng cực tạm thời cũng như các lưỡng cực cảm ứng. Các lưỡng cực tạm thời xuất hiện là do sự chuyển động của", options: ["các nguyên tử trong phân tử.", "các electron trong phân tử.", "các proton trong hạt nhân.", "các neutron và proton trong hạt nhân."], answer: "B", image: null, optionImages: [null,null,null,null] },
+    { id: 15, text: "Cho các chất sau: F₂, Cl₂, Br₂, I₂. Chất có nhiệt độ nóng chảy cao nhất là", options: ["F₂.", "Cl₂.", "Br₂.", "I₂."], answer: "D", image: null, optionImages: [null,null,null,null] },
+    { id: 16, text: "Trong các khí hiếm sau, khí hiếm có nhiệt độ sôi cao nhất là", options: ["Ne.", "Xe.", "Ar.", "Kr."], answer: "B", image: null, optionImages: [null,null,null,null] },
+    { id: 17, text: "Hợp chất nào sau đây tạo được liên kết hydrogen liên phân tử?", options: ["H₂S.", "PH₃.", "HI.", "CH₃OH."], answer: "D", image: null, optionImages: [null,null,null,null] },
+    { id: 18, text: "Chất nào trong các chất sau tồn tại ở thể lỏng trong điều kiện thường?", options: ["CH₃OH.", "CF₄.", "SiH₄.", "CO₂."], answer: "A", image: null, optionImages: [null,null,null,null] },
+    { id: 19, text: "Vì sao HF có nhiệt độ sôi cao hơn hẳn so với HCl, HBr và HI?", options: ["HF có phân tử khối lớn nhất.", "HF có liên kết hydrogen liên phân tử.", "HF có tương tác van der Waals lớn nhất.", "HF là hợp chất phân cực nhất."], answer: "B", image: null, optionImages: [null,null,null,null] },
+    { id: 20, text: "Trong phân tử, các electron chuyển động không ngừng, khi các electron tập trung về một phía sẽ hình thành nên", options: ["cation.", "anion.", "một lưỡng cực tạm thời.", "một lưỡng cực vĩnh viễn."], answer: "C", image: null, optionImages: [null,null,null,null] },
+    { id: 21, text: "(SBT – CD) Giữa các nguyên tử He có thể có loại liên kết nào?", options: ["Liên kết cộng hoá trị.", "Liên kết hydrogen.", "Tương tác van der Waals.", "Không có bất kì liên kết nào."], answer: "C", image: null, optionImages: [null,null,null,null] },
+    { id: 22, text: "(SBT – CD) Chất nào trong số các chất sau tồn tại ở thể lỏng trong điều kiện thường?", options: ["CH₃OH.", "CF₄.", "SiH₄.", "CO₂."], answer: "A", image: null, optionImages: [null,null,null,null] },
+    { id: 23, text: "Dựa vào liên kết giữa các phân tử, hãy cho biết halogen nào sau đây có nhiệt độ sôi cao nhất.", options: ["F₂.", "Cl₂.", "Br₂.", "I₂."], answer: "D", image: null, optionImages: [null,null,null,null] },
+    { id: 24, text: "(Đề MH – 2025) Chất nào sau đây không tạo được liên kết hydrogen giữa các phân tử?", options: ["NH₃.", "H₂O.", "HF.", "CH₄."], answer: "D", image: null, optionImages: [null,null,null,null] },
+    { id: 25, text: "Giữa các nguyên từ khí hiếm Ne, có thể hình thành loại liên kết hay tương tác hoá học nào?", options: ["Liên kết ion.", "Liên kết hydrogen.", "Liên kết cộng hoá trị.", "Tương tác van der Waals."], answer: "D", image: null, optionImages: [null,null,null,null] },
+    { id: 26, text: "(SBT – CD) Ethanol tan vô hạn trong nước do", options: ["cả nước và ethanol đều là phân tử phân cực.", "nước và ethanol có thể tạo liên kết hydrogen với nhau.", "ethanol có thể tạo liên kết hydrogen với các phân tử ethanol khác.", "ethanol và nước có tương tác van der Waals mạnh."], answer: "B", image: null, optionImages: [null,null,null,null] },
+    { id: 27, text: "Ethanol (C₂H₅OH) và dimethylether (CH₃–O–CH₃) có cùng công thức phân tử là C₂H₆O. Phát biểu nào sau đây là đúng?", options: ["Ethanol có nhiệt độ sôi cao hơn dimethylether.", "Dimethylether có nhiệt độ sôi cao hơn ethanol.", "Hai chất có nhiệt độ sôi bằng nhau.", "Hai chất có nhiệt độ sôi không xác định."], answer: "A", image: null, optionImages: [null,null,null,null] },
+    { id: 28, text: "(SBT – CD) Thứ tự nào sau đây thể hiện độ mạnh giảm dần của các loại liên kết?", options: ["Liên kết ion > liên kết cộng hoá trị > liên kết hydrogen > tương tác van der Waals.", "Liên kết ion > liên kết cộng hoá trị > tương tác van der Waals > liên kết hydrogen.", "Liên kết cộng hoá trị > liên kết ion > liên kết hydrogen > tương tác van der Waals.", "Tương tác van der Waals > liên kết hydrogen > liên kết cộng hoá trị > liên kết ion."], answer: "A", image: null, optionImages: [null,null,null,null] },
+    { id: 29, text: "Cho các phát biểu sau:\n(a) Liên kết hydrogen yếu hơn liên kết ion và liên kết cộng hóa trị.\n(b) Liên kết hydrogen mạnh hơn liên kết ion và liên kết cộng hóa trị.\n(c) Tương tác van der Waals yếu hơn liên kết hydrogen.\n(d) Tương tác van der Waals mạnh hơn liên kết hydrogen.\nPhát biểu đúng là", options: ["(a) và (c).", "(a) và (d).", "(b) và (c).", "(b) và (d)."], answer: "A", image: null, optionImages: [null,null,null,null] },
+    { id: 30, text: "Mặc dù chlorine có độ âm điện là 3,16 xấp xỉ với nitrogen là 3,04 nhưng giữa các phân tử HCl không tạo được liên kết hydrogen với nhau, trong khi giữa các phân tử NH₃ tạo được liên kết hydrogen với nhau, nguyên nhân là do", options: ["độ âm điện của chlorine nhỏ hơn nitrogen.", "phân tử NH₃ chứa nhiều nguyên tử hydrogen hơn phân tử HCl.", "tổng số nguyên tử trong phân tử NH₃ nhiều hơn so với phân tử HCl.", "kích thước nguyên tử chlorine lớn hơn nguyên tử nitrogen nên mật độ điện tích âm trên chlorine không đủ lớn để hình thành liên kết hydrogen."], answer: "D", image: null, optionImages: [null,null,null,null] },
+    { id: 31, text: "Xét các phát biểu về liên kết hydrogen. Phát biểu nào sau đây đúng?", options: ["Bất kì phân tử nào có chứa nguyên tử hydrogen cũng có thể tạo liên kết hydrogen với phân tử cùng loại.", "Liên kết hydrogen là liên kết hình thành do sự góp chung cặp electron hoá trị giữa nguyên tử hydrogen và nguyên tử có độ âm điện lớn.", "Liên kết hydrogen là loại liên kết yếu nhất giữa các phân tử.", "Ảnh hưởng của liên kết hydrogen tới nhiệt độ sôi và nhiệt độ nóng chảy của chất là mạnh hơn ảnh hưởng của tương tác van der Waals."], answer: "D", image: null, optionImages: [null,null,null,null] },
+    { id: 32, text: "Cho các chất: nước (H₂O), ammonia (NH₃), methane (CH₄) và nhiệt độ sôi của ba chất trên không theo thứ tự là –33,35 °C, 100 °C, –161,58 °C. Nhận định nào sau đây đúng?", options: ["Nhiệt độ sôi của ammonia là –161,58 °C.", "Nhiệt độ sôi của methane là –33,35 °C.", "Nhiệt độ sôi của methane thấp nhất vì giữa các phân tử methane không có liên kết hydrogen.", "Nhiệt độ sôi của nước cao nhất vì nước có phân tử khối lớn nhất."], answer: "C", image: null, optionImages: [null,null,null,null] },
+    { id: 33, text: "Quy tắc octet không được sử dụng khi xem xét sự hình thành của hai loại liên kết hoặc tương tác nào sau đây?\n(1) Liên kết cộng hoá trị. (2) Liên kết ion.\n(3) Liên kết hydrogen. (4) Tương tác van der Waals.", options: ["(1) và (2).", "(2) và (3).", "(1) và (3).", "(3) và (4)."], answer: "D", image: null, optionImages: [null,null,null,null] },
+    { id: 34, text: "Vì sao H₂O có nhiệt độ sôi cao hơn hẳn so với H₂S, H₂Se, H₂Te?", options: ["H₂O có phân tử khối lớn nhất.", "H₂O có liên kết hydrogen liên phân tử bền.", "H₂O có tương tác van der Waals lớn nhất.", "H₂O là hợp chất phân cực nhất."], answer: "B", image: null, optionImages: [null,null,null,null] },
+    { id: 35, text: "Dãy các chất nào sau đây xếp theo thứ tự nhiệt độ sôi tăng dần?", options: ["CH₄, SiH₄, GeH₄, SnH₄.", "SnH₄, GeH₄, SiH₄, CH₄.", "CH₄, SnH₄, GeH₄, SiH₄.", "SiH₄, CH₄, GeH₄, SnH₄."], answer: "A", image: null, optionImages: [null,null,null,null] },
+    { id: 36, text: "Nhiệt độ sôi của từng chất methane (CH₄), ethane (C₂H₆), propane (C₃H₈) và butane (C₄H₁₀) là một trong bốn nhiệt độ sau: 0 °C; –42 °C; –88 °C và –164 °C. Nhiệt độ sôi 0 °C là của chất nào sau đây?", options: ["methane.", "propane.", "ethane.", "butane."], answer: "D", image: null, optionImages: [null,null,null,null] },
+    { id: 37, text: "Giữa H₂O và HF có thể tạo ra ít nhất bao nhiêu kiểu liên kết hydrogen?", options: ["2.", "3.", "4.", "5."], answer: "C", image: null, optionImages: [null,null,null,null] },
+    { id: 38, text: "Một phân tử nước có thể tạo liên kết hydrogen tối đa với bao nhiêu phân tử nước khác?", options: ["1.", "2.", "3.", "4."], answer: "D", image: null, optionImages: [null,null,null,null] },
+    { id: 39, text: "Mặc dù chlorine có độ âm điện là 3,16 xấp xỉ với nitrogen là 3,04 nhưng giữa các phân tử HCl không tạo được liên kết hydrogen với nhau, trong khi giữa các phân tử NH₃ tạo được liên kết hydrogen với nhau, nguyên nhân là do", options: ["độ âm điện của chlorine nhỏ hơn của nitrogen.", "phân tử NH₃ chứa nhiều nguyên tử hydrogen hơn phân tử HCl.", "tổng số nguyên tử trong phân tử NH₃ nhiều hơn so với phân tử HCl.", "kích thước nguyên tử chlorine lớn hơn nguyên tử nitrogen nên mật độ điện tích âm trên chlorine không đủ lớn để hình thành liên kết hydrogen."], answer: "D", image: null, optionImages: [null,null,null,null] },
+    { id: 40, text: "(SBT – CD) Nếu giữa phân tử chất tan và dung môi có thể tạo thành liên kết hydrogen hoặc có tương tác van der Waals càng mạnh với nhau thì càng tan tốt vào nhau. Lí do nào sau đây là phù hợp để giải thích dầu hoả (thành phần chính là hydrocarbon) không tan trong nước?", options: ["Cả nước và dầu đều là các phân tử có cực.", "Nước là phân tử phân cực và dầu là không phân cực hoặc rất ít phân cực.", "Nước là phân tử không phân cực và dầu là phân cực.", "Cả nước và dầu đều không phân cực."], answer: "B", image: null, optionImages: [null,null,null,null] }
+  ],
+  part2: [
+    {
+      id: 1, text: "Liên kết hydrogen được hình thành giữa nguyên tử H (đã liên kết với một nguyên tử có độ âm điện lớn) với một nguyên tử khác (có độ âm điện lớn) còn cặp electron hoá trị chưa tham gia liên kết.",
+      items: [
+        { label: "a", text: "Liên kết hydrogen bền hơn so với tương tác van der Waals.", answer: true },
+        { label: "b", text: "Liên kết hydrogen chỉ xảy ra giữa các phân tử chứa nguyên tử hydrogen liên kết với một nguyên tử có độ âm điện thấp.", answer: false },
+        { label: "c", text: "Liên kết hydrogen có thể làm tăng nhiệt độ sôi của hợp chất.", answer: true },
+        { label: "d", text: "Liên kết hydrogen là nguyên nhân chính làm cho nước có tính chất đặc biệt, như nhiệt độ sôi cao.", answer: true }
+      ], image: null
+    },
+    {
+      id: 2, text: "(SBT – CD) Mỗi phát biểu nào sau đây là đúng hay sai về liên kết hydrogen?",
+      items: [
+        { label: "a", text: "Bất kì phân tử nào có chứa nguyên tử hydrogen cũng có thể tạo liên kết hydrogen với phân tử cùng loại.", answer: false },
+        { label: "b", text: "Liên kết hydrogen là liên kết hình thành do sự góp chung cặp electron hoá trị giữa nguyên tử hydrogen và nguyên tử có độ âm điện lớn.", answer: false },
+        { label: "c", text: "Liên kết hydrogen là loại liên kết yếu nhất giữa các phân tử.", answer: false },
+        { label: "d", text: "Ảnh hưởng của liên kết hydrogen tới nhiệt độ sôi và nhiệt độ nóng chảy của chất là mạnh hơn ảnh hưởng của tương tác van der Waals.", answer: true }
+      ], image: null
+    },
+    {
+      id: 3, text: "Mỗi phát biểu nào sau đây là đúng hay sai khi nói về liên kết hydrogen liên phân tử?",
+      items: [
+        { label: "a", text: "Là lực hút tĩnh điện giữa nguyên tử H (thường trong các liên kết H–F, H–N, H–O ở phân tử này) với một trong các nguyên tử có độ âm điện mạnh (thường là N, O, F) ở một phân tử khác.", answer: true },
+        { label: "b", text: "Là lực hút giữa các phân tử khác nhau.", answer: false },
+        { label: "c", text: "Là lực hút tĩnh điện giữa các ion trái dấu.", answer: false },
+        { label: "d", text: "Là lực hút giữa các nguyên tử trong một hợp chất cộng hóa trị.", answer: false }
+      ], image: null
+    },
+    {
+      id: 4, text: "Mỗi phát biểu nào sau đây là đúng hay sai khi nói về liên kết hydrogen nội phân tử?",
+      items: [
+        { label: "a", text: "Là lực hút giữa các proton của nguyên tử này với electron của nguyên tử khác.", answer: false },
+        { label: "b", text: "Là lực hút tĩnh điện giữa nguyên tử H (thường trong các liên kết H–F, H–N, H–O) ở một phân tử với một trong các nguyên tử có độ âm điện mạnh (thường là N, O, F) ở ngay chính phân tử đó.", answer: true },
+        { label: "c", text: "Là lực hút giữa các ion trái dấu.", answer: false },
+        { label: "d", text: "Là lực hút giữa các phân tử có chứa nguyên tử hydrogen.", answer: false }
+      ], image: null
+    },
+    {
+      id: 5, text: "Mỗi phát biểu sau là đúng hay sai về liên kết hydrogen và điểm sôi của các chất?",
+      items: [
+        { label: "a", text: "Các chất có liên kết hydrogen thường có điểm sôi cao hơn so với các chất không có liên kết hydrogen.", answer: true },
+        { label: "b", text: "Liên kết hydrogen làm cho nước có nhiệt độ sôi thấp.", answer: false },
+        { label: "c", text: "Liên kết hydrogen giữa các phân tử NH₃ yếu hơn so với liên kết hydrogen giữa các phân tử H₂O.", answer: true },
+        { label: "d", text: "Sự tồn tại của liên kết hydrogen trong nước làm cho nước có tính dẫn điện cao.", answer: false }
+      ], image: null
+    },
+    {
+      id: 6, text: "Mỗi phát biểu sau là đúng hay sai về liên kết hydrogen và tương tác van der Waals?",
+      items: [
+        { label: "a", text: "Cả liên kết hydrogen và tương tác van der Waals đều là tương tác giữa các phân tử.", answer: true },
+        { label: "b", text: "Liên kết hydrogen mạnh hơn tương tác van der Waals.", answer: true },
+        { label: "c", text: "Tương tác van der Waals có thể xuất hiện giữa các phân tử không phân cực.", answer: true },
+        { label: "d", text: "Liên kết hydrogen không xuất hiện trong các phân tử hữu cơ.", answer: false }
+      ], image: null
+    },
+    {
+      id: 7, text: "Mỗi phát biểu sau là đúng hay sai về liên kết hydrogen và tương tác van der Waals?",
+      items: [
+        { label: "a", text: "Liên kết hydrogen mạnh hơn tương tác van der Waals.", answer: true },
+        { label: "b", text: "Tương tác van der Waals chỉ xảy ra giữa các phân tử không phân cực.", answer: false },
+        { label: "c", text: "Liên kết hydrogen chỉ xảy ra khi nguyên tử hydrogen liên kết với F, O, hoặc N.", answer: true },
+        { label: "d", text: "Tương tác van der Waals là tương tác tĩnh điện lưỡng cực – lưỡng cực giữa các nguyên tử hay phân tử.", answer: true }
+      ], image: null
+    },
+    {
+      id: 8, text: "Tương tác van der Waals là loại tương tác yếu hơn nhiều so với liên kết hydrogen và có thể xảy ra giữa các phân tử không phân cực.",
+      items: [
+        { label: "a", text: "Tương tác van der Waals có thể xảy ra giữa các phân tử hydrocarbon không phân cực.", answer: true },
+        { label: "b", text: "Tương tác van der Waals là tương tác tĩnh điện lưỡng cực – lưỡng cực giữa các nguyên tử hay phân tử.", answer: true },
+        { label: "c", text: "Tương tác van der Waals chỉ xảy ra ở nhiệt độ rất thấp.", answer: false },
+        { label: "d", text: "Tương tác van der Waals mạnh hơn liên kết ion.", answer: false }
+      ], image: null
+    },
+    {
+      id: 9, text: "(Đề MH – 2025) Các nguyên tố phổ biến thuộc nhóm halogen (VIIA) trong bảng tuần hoàn các nguyên tố hóa học gồm: F (Z = 9), Cl (Z = 17), Br (Z = 35) và I (Z = 53). Đơn chất halogen tồn tại dạng phân tử X₂, giữa các phân tử X₂ thường có tương tác với nhau. Cho giá trị năng lượng liên kết X – X ở bảng sau:\n• F–F: 159 kJ/mol | Cl–Cl: 243 kJ/mol | Br–Br: 193 kJ/mol | I–I: 151 kJ/mol (ở 25 °C và 1 bar).\n(Năng lượng liên kết X – X càng lớn thì liên kết càng bền).",
+      items: [
+        { label: "a", text: "Cấu hình electron lớp ngoài cùng của nguyên tử X có dạng ns²np⁵.", answer: true },
+        { label: "b", text: "Liên kết giữa các nguyên tử trong X₂ là liên kết cộng hoá trị không phân cực.", answer: true },
+        { label: "c", text: "Tương tác giữa các phân tử X₂ là tương tác van der Waals.", answer: true },
+        { label: "d", text: "Năng lượng liên kết Cl – Cl lớn nhất trong dãy trên vì Cl có bán kính nguyên tử nhỏ nhất.", answer: false }
+      ], image: null
+    },
+    {
+      id: 10, text: "(OTTN) Mỗi phát biểu sau là đúng hay sai?",
+      items: [
+        { label: "a", text: "H₂O có nhiệt độ sôi cao hơn H₂S.", answer: true },
+        { label: "b", text: "Isobutane [(CH₃)₃CH] có nhiệt độ sôi cao hơn butane (CH₃CH₂CH₂CH₃).", answer: false },
+        { label: "c", text: "Ethanol tan vô hạn trong nước do có thể hình thành liên kết hydrogen giữa các phân tử ethanol và các phân tử nước.", answer: true },
+        { label: "d", text: "Nhiệt độ sôi của HF < HCl < HBr < HI do khối lượng phân tử tăng dần.", answer: false }
+      ], image: null
+    },
+    {
+      id: 11, text: "(Đề MH – 2025) Cho bảng số liệu sau:\n• Nước (H₂O): Nhiệt độ sôi 100,0 °C ở 1 atm\n• Hydrogen sulfide (H₂S): Nhiệt độ sôi –60,7 °C ở 1 atm",
+      items: [
+        { label: "a", text: "Do có liên kết hydrogen giữa các phân tử nên nước có nhiệt độ sôi cao hơn hydrogen sulfide.", answer: true },
+        { label: "b", text: "Trong phân tử H₂O và phân tử H₂S chỉ có các liên kết cộng hóa trị.", answer: true },
+        { label: "c", text: "Số liên kết trong phân tử H₂O bằng số liên kết trong phân tử H₂S.", answer: true },
+        { label: "d", text: "Liên kết O – H trong phân tử H₂O kém phân cực hơn liên kết S – H trong phân tử H₂S.", answer: false }
+      ], image: null
+    },
+    {
+      id: 12, text: "Cho bảng số liệu sau:\n• Nước (H₂O): Nhiệt độ sôi 100,0 °C ở 1 atm\n• Amoniac (NH₃): Nhiệt độ sôi –33,3 °C ở 1 atm",
+      items: [
+        { label: "a", text: "Do có liên kết hydrogen giữa các phân tử nên nước có nhiệt độ sôi cao hơn ammonia.", answer: true },
+        { label: "b", text: "Trong phân tử H₂O và phân tử NH₃ chỉ có các liên kết cộng hóa trị.", answer: true },
+        { label: "c", text: "Số liên kết trong phân tử H₂O nhiều hơn số liên kết trong phân tử NH₃.", answer: false },
+        { label: "d", text: "Liên kết O – H trong phân tử H₂O phân cực mạnh hơn liên kết N – H trong phân tử NH₃.", answer: true }
+      ], image: null
+    },
+    {
+      id: 13, text: "Mô hình tinh thể của nước đá được biểu diễn ở hình bên dưới:",
+      items: [
+        { label: "a", text: "Trong tinh thể nước đá, mỗi phân tử nước liên kết với 5 phân tử nước gần nhất, nằm trên 5 đỉnh của một tứ diện đều.", answer: false },
+        { label: "b", text: "Trong tinh thể nước đá có chứa liên kết hydrogen giữa các phân tử nước.", answer: true },
+        { label: "c", text: "Nên ướp lạnh các lon bia, nước giải khát trong ngăn đá tủ lạnh để tránh làm lon bia bị biến dạng.", answer: false },
+        { label: "d", text: "Do có cấu trúc tứ diện nên tinh thể phân tử nước đá cứng.", answer: false }
+      ], image: SVG_ICE_CRYSTAL
+    },
+    {
+      id: 14, text: "Khối lượng mol (g/mol) của nước, ammonia (NH₃) và methane (CH₄) lần lượt bằng 18, 17 và 16. Nước sôi ở 100 °C, còn ammonia sôi ở –33,35 °C và methane sôi ở –161,58 °C.",
+      items: [
+        { label: "a", text: "Các phân tử H₂O, NH₃ và CH₄ đều chứa liên kết cộng hóa trị phân cực.", answer: true },
+        { label: "b", text: "Các phân tử H₂O và NH₃ tạo được liên kết hydrogen.", answer: true },
+        { label: "c", text: "Phân tử CH₄ có nhiệt độ sôi thấp nhất là do phân tử khối nhỏ nhất.", answer: false },
+        { label: "d", text: "Phân tử H₂O tạo được liên kết hydrogen nhiều hơn phân tử NH₃ và CH₄.", answer: true }
+      ], image: null
+    },
+    {
+      id: 15, text: "Nhiệt độ sôi của các hợp chất với hydrogen của các nguyên tố nhóm VA, VIA và VIIA được biểu diễn qua đồ thị bên dưới:",
+      items: [
+        { label: "a", text: "Nhiệt độ sôi của các hợp chất với hydrogen của các nguyên tố nhóm VA, VIA, VIIA tăng dần theo chiều tăng của phân tử khối.", answer: false },
+        { label: "b", text: "Nhiệt độ sôi của H₂O, HF, NH₃ là cao nhất so với các hợp chất còn lại trong mỗi nhóm.", answer: true },
+        { label: "c", text: "Nhiệt độ sôi của H₂O, HF, NH₃ cao bất thường so với các hợp chất còn lại trong cùng một nhóm là do giữa chúng có liên kết hydrogen liên phân tử.", answer: true },
+        { label: "d", text: "Nhiệt độ sôi của các hợp chất với hydrogen của các nguyên tố còn lại tăng dần là do khối lượng phân tử tăng dần, tương tác van der waals giảm dần.", answer: false }
+      ], image: SVG_BOILING_CHART
+    }
+  ],
+  part3: [
+    { id: 1, text: "Cho các chất sau: H₂O; NH₃; HF; H₂S và CH₄. Có bao nhiêu chất tạo được liên kết hydrogen?", answer: "3", image: null },
+    { id: 2, text: "Cho các chất sau: C₂H₅OH, CH₃OCH₃, CH₃NH₂, CH₃COOH, HCHO và C₆H₆. Có bao nhiêu chất có thể tạo được liên kết hydrogen liên phân tử?", answer: "3", image: null },
+    { id: 3, text: "(SBT – CD) Cho các phân tử: H₂O, NH₃, HF, H₂S, CO₂, HCl. Số phân tử có thể tạo liên kết hydrogen với phân tử cùng loại là bao nhiêu?", answer: "3", image: null },
+    { id: 4, text: "Trong các phân tử sau: H₂O, CH₄, NH₃, HF, CO₂, H₂. Số phân tử có thể tạo liên kết hydrogen với phân tử nước là bao nhiêu?", answer: "3", image: null },
+    { id: 5, text: "Cho các yếu tố: khối lượng phân tử tăng, kích thước phân tử tăng, độ âm điện tăng, tính kim loại tăng. Có bao nhiêu yếu tố sẽ làm tăng tương tác van der Waals?", answer: "2", image: null },
+    { id: 6, text: "Số nguyên tử hydrogen trong phân tử ethanol (C₂H₅OH) không tham gia vào liên kết hydrogen là bao nhiêu?", answer: "5", image: null },
+    { id: 7, text: "Giữa H₂O và HF có thể tạo ra ít nhất bao nhiêu kiểu liên kết hydrogen?", answer: "4", image: null },
+    { id: 8, text: "Cho dãy các chất sau: (1) CH₄; (2) NH₃; (3) H₂S và (4) H₂O. Sắp xếp dãy các chất xếp theo thứ tự nhiệt độ sôi tăng dần? (Nhập chuỗi số, ví dụ: 1-3-2-4 hoặc 1324)", answer: "1-3-2-4", image: null },
+    { id: 9, text: "Cho dãy các chất sau: (1) HCl; (2) HBr; (3) HI; (4) HF. Sắp xếp các chất theo thứ tự nhiệt độ sôi tăng dần? (Nhập chuỗi số, ví dụ: 1-2-3-4)", answer: "1-2-3-4", image: null },
+    { id: 10, text: "Cho dãy các chất sau: (1) Ne; (2) Ar; (3) Kr; (4) Xe. Sắp xếp các chất theo thứ tự lực tương tác van der Waals giảm dần? (Nhập chuỗi số, ví dụ: 4-3-2-1)", answer: "4-3-2-1", image: null },
+    { id: 11, text: "Nhiệt độ sôi của từng chất methane (CH₄), ethane (C₂H₆), propane (C₃H₈) và butane (C₄H₁₀) là một trong bốn nhiệt độ sau: 0 °C, –164 °C, –42 °C và –88 °C. Nhiệt độ sôi của butane (C₄H₁₀) là bao nhiêu °C? (Nhập số nguyên)", answer: "0", image: null },
+    { id: 12, text: "Nhiệt độ sôi của từng chất nước (H₂O), ammonia (NH₃), hydrogen fluoride (HF) và hydrogen sulfide (H₂S) là một trong bốn nhiệt độ sau: 100 °C, –33 °C, 19,5 °C và –60 °C. Nhiệt độ sôi của hydrogen fluoride (HF) là bao nhiêu °C? (Nhập số thập phân dùng dấu phẩy hoặc chấm: 19,5 hoặc 19.5)", answer: "19,5", image: null },
+    { id: 13, text: "Nhiệt độ sôi của từng chất iodine (I₂), chlorine (Cl₂), bromine (Br₂) và fluorine (F₂) là một trong bốn nhiệt độ sau: 184 °C, –101 °C, 59 °C và –188 °C. Nhiệt độ sôi của bromine (Br₂) là bao nhiêu °C? (Nhập số nguyên)", answer: "59", image: null },
+    { id: 14, text: "(SBT – CD) Quy tắc octet không được sử dụng khi xem xét sự hình thành của hai loại liên kết hoặc tương tác nào sau đây?\n(1) Liên kết cộng hoá trị; (2) Liên kết ion;\n(3) Liên kết hydrogen; (4) Tương tác van der Waals.\nChọn các số tương ứng theo thứ tự tăng dần? (Nhập ví dụ: 3, 4 hoặc 34)", answer: "3, 4", image: null }
+  ]
+};
+
+let currentData = null;
+const STORAGE_KEY = "WORKSHEET_CHEM10_H_VDW_DATA_V3";
+
+// UI Toast Notification helper (Replaces alert)
+function showToast(message, type = "info") {
+  const toast = document.getElementById("customToast");
+  const msgEl = document.getElementById("toastMessage");
+  const iconEl = document.getElementById("toastIcon");
+
+  toast.className = `custom-toast toast-${type} show`;
+  msgEl.innerText = message;
+  iconEl.innerText = type === "success" ? "✅" : (type === "warning" ? "⚠️" : (type === "error" ? "❌" : "ℹ️"));
+
+  setTimeout(() => {
+    toast.classList.remove("show");
+  }, 4000);
+}
+
+// Custom Modal Confirmation helper (Replaces confirm)
+let pendingConfirmCallback = null;
+function showConfirmDialog(title, message, callback) {
+  document.getElementById("confirmModalTitle").innerText = title;
+  document.getElementById("confirmModalMessage").innerText = message;
+  document.getElementById("confirmModal").style.display = "flex";
+  pendingConfirmCallback = callback;
+}
+
+function closeConfirmModal(result) {
+  document.getElementById("confirmModal").style.display = "none";
+  if (typeof pendingConfirmCallback === "function") {
+    const cb = pendingConfirmCallback;
+    pendingConfirmCallback = null;
+    cb(result);
+  }
+}
+
+const TimerManager = {
+  totalSeconds: 0,
+  intervalId: null,
+  hasStarted: false,
+  isPaused: false,
+  isSubmitted: false,
+
+  start() {
+    if (this.hasStarted || this.isSubmitted) return;
+    this.hasStarted = true;
+    this.isPaused = false;
+    this.updateStatusUI("running", "Đang tính giờ");
+    this.intervalId = setInterval(() => {
+      if (!this.isPaused && !this.isSubmitted) {
+        this.totalSeconds++;
+        this.renderTime();
+      }
+    }, 1000);
+  },
+
+  pause() {
+    if (!this.hasStarted || this.isSubmitted || this.isPaused) return;
+    this.isPaused = true;
+    this.updateStatusUI("paused", "⏸️ Đã tạm dừng");
+  },
+
+  resume() {
+    if (!this.hasStarted || this.isSubmitted || !this.isPaused) return;
+    this.isPaused = false;
+    this.updateStatusUI("running", "Đang tính giờ");
+  },
+
+  stop() {
+    this.isSubmitted = true;
+    if (this.intervalId) clearInterval(this.intervalId);
+    this.updateStatusUI("submitted", "Đã nộp bài");
+  },
+
+  reset() {
+    if (this.intervalId) clearInterval(this.intervalId);
+    this.totalSeconds = 0;
+    this.hasStarted = false;
+    this.isPaused = false;
+    this.isSubmitted = false;
+    this.renderTime();
+    this.updateStatusUI("ready", "Sẵn sàng");
+  },
+
+  renderTime() {
+    const hrs = Math.floor(this.totalSeconds / 3600);
+    const mins = Math.floor((this.totalSeconds % 3600) / 60);
+    const secs = this.totalSeconds % 60;
+    const format = (n) => (n < 10 ? "0" + n : "" + n);
+    const display = `${format(hrs)}:${format(mins)}:${format(secs)}`;
+    const clockEl = document.getElementById("timerClock");
+    if (clockEl) clockEl.innerText = display;
+    return display;
+  },
+
+  updateStatusUI(state, text) {
+    const el = document.getElementById("timerStatus");
+    if (!el) return;
+    el.className = `timer-status status-${state}`;
+    el.innerText = text;
+  }
+};
+
+function handleStudentActivity() {
+  TimerManager.start();
+}
+
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) TimerManager.pause();
+  else TimerManager.resume();
+});
+window.addEventListener("blur", () => TimerManager.pause());
+window.addEventListener("focus", () => TimerManager.resume());
+
+function initData() {
+  const saved = localStorage.getItem(STORAGE_KEY);
+  if (saved) {
+    try {
+      currentData = JSON.parse(saved);
+      if (!currentData.config.numberingMode) currentData.config.numberingMode = "section";
+      if (!currentData.config.gasUrl) currentData.config.gasUrl = GAS_ENDPOINT_DEFAULT;
+    } catch (e) {
+      currentData = JSON.parse(JSON.stringify(ORIGINAL_DATA));
+    }
+  } else {
+    currentData = JSON.parse(JSON.stringify(ORIGINAL_DATA));
+  }
+  syncHeaderData();
+}
+
+function syncHeaderData() {
+  const t = document.getElementById("displayHeaderTopic");
+  if (t) t.innerText = currentData.config.topic;
+}
+
+function saveDataToStorage() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(currentData));
+  syncHeaderData();
+}
+
+function renderWorksheet() {
+  const container = document.getElementById("worksheetContainer");
+  container.innerHTML = "";
+  const numMode = currentData.config.numberingMode || "section";
+  let runningIndex = 0;
+
+  // PHẦN I
+  if (currentData.config.enableP1 && currentData.part1.length > 0) {
+    const sec1 = document.createElement("div");
+    sec1.className = "part-section";
+    sec1.innerHTML = `
+      <div class="part-header">
+        <div class="part-title">⚛️ PHẦN I. TRẮC NGHIỆM NHIỀU PHƯƠNG ÁN LỰA CHỌN</div>
+        <div class="part-badge">${currentData.part1.length} câu • ${currentData.config.scoreP1} điểm</div>
+      </div>
+    `;
+
+    currentData.part1.forEach((q, idx) => {
+      runningIndex++;
+      const qNumText = numMode === "continuous" ? `Câu ${runningIndex}` : `Câu ${idx + 1}`;
+      const card = document.createElement("div");
+      card.className = "q-card";
+      card.id = `q_card_p1_${q.id}`;
+
+      let imgHTML = "";
+      if (q.image) {
+        imgHTML = `<div class="q-image-container">${q.image.startsWith('<svg') ? q.image : `<img src="${q.image}" alt="Hình câu hỏi">`}</div>`;
+      }
+
+      let optionsHTML = "";
+      const optLabels = ["A", "B", "C", "D"];
+      const optImages = q.optionImages || [null, null, null, null];
+
+      optionsHTML = `<div class="options-grid cols-2">`;
+      q.options.forEach((optText, oIdx) => {
+        const letter = optLabels[oIdx];
+        const optImg = optImages[oIdx] ? `<img src="${optImages[oIdx]}" class="opt-img-thumb" alt="Hình đáp án ${letter}">` : "";
+        optionsHTML += `
+          <label class="opt-label" id="lbl_p1_${q.id}_${letter}" onclick="handleOptionSelect('p1', ${q.id}, '${letter}')">
+            <div class="opt-content-row">
+              <input type="radio" name="p1_${q.id}" value="${letter}" onchange="handleStudentActivity()">
+              <span><strong>${letter}.</strong> ${escapeHTML(optText)}</span>
+            </div>
+            ${optImg}
+          </label>
+        `;
+      });
+      optionsHTML += `</div>`;
+
+      card.innerHTML = `
+        <div class="q-meta">
+          <span class="q-number">${qNumText}</span>
+          <span class="q-status-badge" id="badge_p1_${q.id}" style="display:none;"></span>
+        </div>
+        <div class="q-text">${escapeHTML(q.text)}</div>
+        ${imgHTML}
+        ${optionsHTML}
+        <div id="fb_p1_${q.id}" class="feedback-box" style="display:none;"></div>
+      `;
+      sec1.appendChild(card);
+    });
+    container.appendChild(sec1);
+  }
+
+  // PHẦN II
+  if (currentData.config.enableP2 && currentData.part2.length > 0) {
+    const sec2 = document.createElement("div");
+    sec2.className = "part-section";
+    sec2.innerHTML = `
+      <div class="part-header">
+        <div class="part-title">⚖️ PHẦN II. CÂU HỎI TRẮC NGHIỆM ĐÚNG – SAI</div>
+        <div class="part-badge">${currentData.part2.length} câu • ${currentData.config.scoreP2} điểm</div>
+      </div>
+      <p style="font-size:0.9rem; color:var(--text-muted); margin-bottom:14px;">Trong mỗi ý a), b), c), d) ở từng câu, học sinh chọn Đúng hoặc Sai.</p>
+    `;
+
+    currentData.part2.forEach((q, idx) => {
+      runningIndex++;
+      const qNumText = numMode === "continuous" ? `Câu ${runningIndex}` : `Câu ${idx + 1}`;
+      const card = document.createElement("div");
+      card.className = "q-card";
+      card.id = `q_card_p2_${q.id}`;
+
+      let imgHTML = "";
+      if (q.image) {
+        imgHTML = `<div class="q-image-container">${q.image.startsWith('<svg') ? q.image : `<img src="${q.image}" alt="Hình câu hỏi">`}</div>`;
+      }
+
+      let rowsHTML = "";
+      q.items.forEach((item, iIdx) => {
+        rowsHTML += `
+          <tr class="tf-row">
+            <td class="tf-content"><strong>${item.label})</strong> ${escapeHTML(item.text)}</td>
+            <td class="tf-actions">
+              <div class="tf-btn-group">
+                <button type="button" class="tf-btn" id="btn_tf_${q.id}_${iIdx}_t" onclick="setTFAnswer(${q.id}, ${iIdx}, true)">Đúng</button>
+                <button type="button" class="tf-btn" id="btn_tf_${q.id}_${iIdx}_f" onclick="setTFAnswer(${q.id}, ${iIdx}, false)">Sai</button>
+              </div>
+            </td>
+          </tr>
+        `;
+      });
+
+      card.innerHTML = `
+        <div class="q-meta">
+          <span class="q-number">${qNumText}</span>
+          <span class="q-status-badge" id="badge_p2_${q.id}" style="display:none;"></span>
+        </div>
+        <div class="q-text">${escapeHTML(q.text)}</div>
+        ${imgHTML}
+        <table class="tf-table">
+          <tbody>${rowsHTML}</tbody>
+        </table>
+        <div id="fb_p2_${q.id}" class="feedback-box" style="display:none;"></div>
+      `;
+      sec2.appendChild(card);
+    });
+    container.appendChild(sec2);
+  }
+
+  // PHẦN III
+  if (currentData.config.enableP3 && currentData.part3.length > 0) {
+    const sec3 = document.createElement("div");
+    sec3.className = "part-section";
+    sec3.innerHTML = `
+      <div class="part-header">
+        <div class="part-title">✍️ PHẦN III. CÂU HỎI TRẢ LỜI NGẮN</div>
+        <div class="part-badge">${currentData.part3.length} câu • ${currentData.config.scoreP3} điểm</div>
+      </div>
+    `;
+
+    currentData.part3.forEach((q, idx) => {
+      runningIndex++;
+      const qNumText = numMode === "continuous" ? `Câu ${runningIndex}` : `Câu ${idx + 1}`;
+      const card = document.createElement("div");
+      card.className = "q-card";
+      card.id = `q_card_p3_${q.id}`;
+
+      let imgHTML = "";
+      if (q.image) {
+        imgHTML = `<div class="q-image-container">${q.image.startsWith('<svg') ? q.image : `<img src="${q.image}" alt="Hình câu hỏi">`}</div>`;
+      }
+
+      card.innerHTML = `
+        <div class="q-meta">
+          <span class="q-number">${qNumText}</span>
+          <span class="q-status-badge" id="badge_p3_${q.id}" style="display:none;"></span>
+        </div>
+        <div class="q-text">${escapeHTML(q.text)}</div>
+        ${imgHTML}
+        <div class="short-input-box">
+          <input type="text" class="short-input" id="input_p3_${q.id}" placeholder="Nhập câu trả lời ngắn..." oninput="handleStudentActivity()">
+        </div>
+        <div id="fb_p3_${q.id}" class="feedback-box" style="display:none;"></div>
+      `;
+      sec3.appendChild(card);
+    });
+    container.appendChild(sec3);
+  }
+}
+
+function handleOptionSelect(part, qId, letter) {
+  handleStudentActivity();
+  const rad = document.querySelector(`input[name="${part}_${qId}"][value="${letter}"]`);
+  if (rad) rad.checked = true;
+  ["A", "B", "C", "D"].forEach(l => {
+    const el = document.getElementById(`lbl_${part}_${qId}_${l}`);
+    if (el) el.classList.remove("selected");
+  });
+  const cur = document.getElementById(`lbl_${part}_${qId}_${letter}`);
+  if (cur) cur.classList.add("selected");
+}
+
+const studentTFSelections = {};
+function setTFAnswer(qId, itemIdx, val) {
+  handleStudentActivity();
+  const k = `${qId}_${itemIdx}`;
+  studentTFSelections[k] = val;
+  const btnT = document.getElementById(`btn_tf_${qId}_${itemIdx}_t`);
+  const btnF = document.getElementById(`btn_tf_${qId}_${itemIdx}_f`);
+  if (!btnT || !btnF) return;
+  if (val === true) {
+    btnT.className = "tf-btn active-true";
+    btnF.className = "tf-btn";
+  } else {
+    btnT.className = "tf-btn";
+    btnF.className = "tf-btn active-false";
+  }
+}
+
+function submitWorksheet() {
+  const studentNameInput = document.getElementById("studentName");
+  const studentClassInput = document.getElementById("studentClass");
+  const studentName = studentNameInput ? studentNameInput.value.trim() : "";
+  const studentClass = studentClassInput ? studentClassInput.value.trim() : "";
+
+  if (!studentName || !studentClass) {
+    showToast("⚠️ Vui lòng nhập đầy đủ Họ tên và Lớp học trước khi nộp bài!", "warning");
+    if (!studentName) studentNameInput.focus();
+    else studentClassInput.focus();
+    return;
+  }
+
+  TimerManager.stop();
+  let totalScore = 0;
+  let correctCount = 0;
+  let wrongCount = 0;
+  let unansweredCount = 0;
+  const detailsLog = { part1: {}, part2: {}, part3: {} };
+
+  // Grade Part 1
+  if (currentData.config.enableP1 && currentData.part1.length > 0) {
+    const scorePerQ = currentData.config.scoreP1 / currentData.part1.length;
+    currentData.part1.forEach(q => {
+      const card = document.getElementById(`q_card_p1_${q.id}`);
+      const fb = document.getElementById(`fb_p1_${q.id}`);
+      const badge = document.getElementById(`badge_p1_${q.id}`);
+      const checked = document.querySelector(`input[name="p1_${q.id}"]:checked`);
+      const userVal = checked ? checked.value : "";
+
+      detailsLog.part1[`câu_${q.id}`] = { user: userVal, key: q.answer };
+
+      if (!checked) {
+        unansweredCount++;
+        card.className = "q-card status-unanswered";
+        badge.className = "q-status-badge badge-u";
+        badge.innerText = "Chưa làm";
+        badge.style.display = "inline-block";
+        fb.className = "feedback-box feedback-unanswered";
+        fb.innerHTML = `⚠️ Bạn chưa chọn đáp án. (Đáp án đúng: <strong>${q.answer}</strong>)`;
+        fb.style.display = "flex";
+      } else if (checked.value === q.answer) {
+        correctCount++;
+        totalScore += scorePerQ;
+        card.className = "q-card status-correct";
+        badge.className = "q-status-badge badge-c";
+        badge.innerText = "✓ Đúng";
+        badge.style.display = "inline-block";
+        fb.className = "feedback-box feedback-correct";
+        fb.innerHTML = `✓ Chính xác! Đáp án đúng là <strong>${q.answer}</strong>.`;
+        fb.style.display = "flex";
+      } else {
+        wrongCount++;
+        card.className = "q-card status-wrong";
+        badge.className = "q-status-badge badge-w";
+        badge.innerText = "✗ Chưa đúng";
+        badge.style.display = "inline-block";
+        fb.className = "feedback-box feedback-wrong";
+        fb.innerHTML = `✗ Chưa đúng. Bạn chọn <strong>${checked.value}</strong>. Đáp án đúng: <strong>${q.answer}</strong>.`;
+        fb.style.display = "flex";
+      }
+    });
+  }
+
+  // Grade Part 2
+  if (currentData.config.enableP2 && currentData.part2.length > 0) {
+    const scorePerQ = currentData.config.scoreP2 / currentData.part2.length;
+    currentData.part2.forEach(q => {
+      const card = document.getElementById(`q_card_p2_${q.id}`);
+      const fb = document.getElementById(`fb_p2_${q.id}`);
+      const badge = document.getElementById(`badge_p2_${q.id}`);
+
+      let numCorrectItems = 0;
+      let hasAnyAnswer = false;
+      const keyDetails = [];
+      const itemLogs = {};
+
+      q.items.forEach((item, iIdx) => {
+        const k = `${q.id}_${iIdx}`;
+        const ans = studentTFSelections[k];
+        if (ans !== undefined) hasAnyAnswer = true;
+        if (ans === item.answer) numCorrectItems++;
+        keyDetails.push(`${item.label}: <strong>${item.answer ? 'Đúng' : 'Sai'}</strong>`);
+        itemLogs[item.label] = { user: ans !== undefined ? (ans ? 'Đúng' : 'Sai') : 'Trống', key: item.answer ? 'Đúng' : 'Sai' };
+      });
+
+      detailsLog.part2[`câu_${q.id}`] = itemLogs;
+
+      let earnedRatio = 0;
+      if (numCorrectItems === 1) earnedRatio = 0.1;
+      else if (numCorrectItems === 2) earnedRatio = 0.25;
+      else if (numCorrectItems === 3) earnedRatio = 0.5;
+      else if (numCorrectItems === 4) earnedRatio = 1.0;
+
+      const qEarned = earnedRatio * scorePerQ;
+      totalScore += qEarned;
+
+      if (!hasAnyAnswer) {
+        unansweredCount++;
+        card.className = "q-card status-unanswered";
+        badge.className = "q-status-badge badge-u";
+        badge.innerText = "Chưa làm";
+        badge.style.display = "inline-block";
+        fb.className = "feedback-box feedback-unanswered";
+        fb.innerHTML = `⚠️ Chưa trả lời. Đáp án đúng: [ ${keyDetails.join(" | ")} ]`;
+        fb.style.display = "flex";
+      } else if (numCorrectItems === 4) {
+        correctCount++;
+        card.className = "q-card status-correct";
+        badge.className = "q-status-badge badge-c";
+        badge.innerText = "✓ Đúng hoàn toàn (4/4 ý)";
+        badge.style.display = "inline-block";
+        fb.className = "feedback-box feedback-correct";
+        fb.innerHTML = `✓ Xuất sắc! Đúng cả 4 ý (+${qEarned.toFixed(2)} đ).`;
+        fb.style.display = "flex";
+      } else {
+        wrongCount++;
+        card.className = "q-card status-wrong";
+        badge.className = "q-status-badge badge-w";
+        badge.innerText = `Đúng ${numCorrectItems}/4 ý (+${qEarned.toFixed(2)} đ)`;
+        badge.style.display = "inline-block";
+        fb.className = "feedback-box feedback-wrong";
+        fb.innerHTML = `Đúng ${numCorrectItems}/4 ý. Đáp án chuẩn: [ ${keyDetails.join(" | ")} ]`;
+        fb.style.display = "flex";
+      }
+    });
+  }
+
+  // Grade Part 3
+  if (currentData.config.enableP3 && currentData.part3.length > 0) {
+    const scorePerQ = currentData.config.scoreP3 / currentData.part3.length;
+    currentData.part3.forEach(q => {
+      const card = document.getElementById(`q_card_p3_${q.id}`);
+      const fb = document.getElementById(`fb_p3_${q.id}`);
+      const badge = document.getElementById(`badge_p3_${q.id}`);
+      const inp = document.getElementById(`input_p3_${q.id}`);
+      const userVal = inp ? inp.value.trim() : "";
+
+      detailsLog.part3[`câu_${q.id}`] = { user: userVal, key: q.answer };
+
+      if (!userVal) {
+        unansweredCount++;
+        card.className = "q-card status-unanswered";
+        badge.className = "q-status-badge badge-u";
+        badge.innerText = "Chưa làm";
+        badge.style.display = "inline-block";
+        fb.className = "feedback-box feedback-unanswered";
+        fb.innerHTML = `⚠️ Bạn chưa nhập đáp án. (Đáp án đúng: <strong>${q.answer}</strong>)`;
+        fb.style.display = "flex";
+      } else {
+        const cleanUser = userVal.replace(/\s+/g, "").toLowerCase();
+        const cleanAns = q.answer.replace(/\s+/g, "").toLowerCase();
+        const isMatch = cleanUser === cleanAns || cleanUser === cleanAns.replace(/,/g, "") || cleanUser.replace(/,/g, "") === cleanAns;
+
+        if (isMatch) {
+          correctCount++;
+          totalScore += scorePerQ;
+          card.className = "q-card status-correct";
+          badge.className = "q-status-badge badge-c";
+          badge.innerText = "✓ Đúng";
+          badge.style.display = "inline-block";
+          fb.className = "feedback-box feedback-correct";
+          fb.innerHTML = `✓ Chính xác! Đáp án chuẩn: <strong>${q.answer}</strong>.`;
+          fb.style.display = "flex";
+        } else {
+          wrongCount++;
+          card.className = "q-card status-wrong";
+          badge.className = "q-status-badge badge-w";
+          badge.innerText = "✗ Chưa đúng";
+          badge.style.display = "inline-block";
+          fb.className = "feedback-box feedback-wrong";
+          fb.innerHTML = `✗ Chưa đúng. Bạn nhập: "${userVal}". Đáp án chuẩn: <strong>${q.answer}</strong>.`;
+          fb.style.display = "flex";
+        }
+      }
+    });
+  }
+
+  // Display Scoreboard
+  const finalScore = Math.round(totalScore * 100) / 100;
+  const resPanel = document.getElementById("resultPanel");
+  resPanel.style.display = "block";
+  document.getElementById("scoreDisplay").innerText = `${finalScore.toFixed(2)} / ${currentData.config.totalScore}`;
+  document.getElementById("statCorrect").innerText = correctCount;
+  document.getElementById("statWrong").innerText = wrongCount;
+  document.getElementById("statUnanswered").innerText = unansweredCount;
+
+  const timeFormatted = TimerManager.renderTime();
+  const timeRes = document.getElementById("timeResultDisplay");
+  if (timeRes) {
+    timeRes.innerHTML = `⏱️ Thời gian làm bài: <strong>${timeFormatted}</strong>`;
+  }
+
+  resPanel.scrollIntoView({ behavior: "smooth" });
+
+  sendDataToGoogleSheet({
+    timestamp: new Date().toLocaleString("vi-VN"),
+    studentName: studentName,
+    studentClass: studentClass,
+    totalScore: finalScore,
+    maxScore: currentData.config.totalScore,
+    correctCount: correctCount,
+    wrongCount: wrongCount,
+    unansweredCount: unansweredCount,
+    duration: timeFormatted,
+    durationSeconds: TimerManager.totalSeconds,
+    details: detailsLog
+  });
+}
+
+// Google Sheets Sync Logic via Google Apps Script Web App
+async function sendDataToGoogleSheet(payload) {
+  const url = currentData.config.gasUrl || GAS_ENDPOINT_DEFAULT;
+  const submitFb = document.getElementById("submitSyncFeedback");
+  const resultSyncWrapper = document.getElementById("resultSyncWrapper");
+
+  const syncLoadingHTML = `
+    <div class="sync-status-card sync-loading">
+      <span>🔄</span>
+      <span>Đang gửi kết quả lên Google Sheets giáo viên...</span>
+    </div>
+  `;
+  if (submitFb) submitFb.innerHTML = syncLoadingHTML;
+  if (resultSyncWrapper) resultSyncWrapper.innerHTML = syncLoadingHTML;
+
+  try {
+    // Send data as text/plain to avoid preflight CORS restrictions on GAS Web App
+    await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify(payload),
+      mode: "no-cors"
+    });
+
+    const syncSuccessHTML = `
+      <div class="sync-status-card sync-success">
+        <span>✅</span>
+        <span>Đã lưu kết quả thành công vào hệ thống của giáo viên!</span>
+      </div>
+    `;
+    if (submitFb) submitFb.innerHTML = syncSuccessHTML;
+    if (resultSyncWrapper) resultSyncWrapper.innerHTML = syncSuccessHTML;
+    showToast("✓ Đã gửi bài và lưu điểm thành công lên Google Sheets!", "success");
+  } catch (err) {
+    console.warn("GAS Submission warning:", err);
+    const syncErrorHTML = `
+      <div class="sync-status-card sync-error">
+        <span>⚠️️</span>
+        <span>Không thể kết nối máy chủ Google Sheets. Bạn có thể chụp màn hình kết quả này gửi giáo viên!</span>
+      </div>
+    `;
+    if (submitFb) submitFb.innerHTML = syncErrorHTML;
+    if (resultSyncWrapper) resultSyncWrapper.innerHTML = syncErrorHTML;
+    showToast("⚠️ Không thể đồng bộ trực tiếp lên Sheets. Vui lòng chụp lại màn hình điểm số.", "warning");
+  }
+}
+
+function promptResetWorksheet() {
+  showConfirmDialog(
+    "Làm lại bài",
+    "Bạn có chắc chắn muốn làm lại bài? Mọi câu trả lời đã chọn sẽ bị xóa và đồng hồ sẽ được thiết lập lại từ đầu.",
+    (confirmed) => {
+      if (!confirmed) return;
+      TimerManager.reset();
+      for (let k in studentTFSelections) delete studentTFSelections[k];
+      document.getElementById("resultPanel").style.display = "none";
+      const submitFb = document.getElementById("submitSyncFeedback");
+      if (submitFb) submitFb.innerHTML = "";
+      renderWorksheet();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      showToast("Đã thiết lập lại bài tập!", "info");
+    }
+  );
+}
+
+function openAdminModal() {
+  document.getElementById("adminPasswordInput").value = "";
+  document.getElementById("loginError").style.display = "none";
+  document.getElementById("loginModal").style.display = "flex";
+  setTimeout(() => document.getElementById("adminPasswordInput").focus(), 150);
+}
+
+function closeLoginModal() {
+  document.getElementById("loginModal").style.display = "none";
+}
+
+function handleLoginKey(e) {
+  if (e.key === "Enter") submitAdminLogin();
+  else if (e.key === "Escape") closeLoginModal();
+}
+
+function submitAdminLogin() {
+  const pwd = document.getElementById("adminPasswordInput").value;
+  if (pwd === "1230") {
+    closeLoginModal();
+    document.getElementById("adminModal").style.display = "flex";
+    switchAdminTab("bank");
+    showToast("Đăng nhập quản trị thành công!", "success");
+  } else {
+    document.getElementById("loginError").style.display = "block";
+  }
+}
+
+function closeAdminModal() {
+  document.getElementById("adminModal").style.display = "none";
+}
+
+function switchAdminTab(tab) {
+  document.getElementById("btnTabBank").className = `tab-btn ${tab === 'bank' ? 'active' : ''}`;
+  document.getElementById("btnTabConfig").className = `tab-btn ${tab === 'config' ? 'active' : ''}`;
+  document.getElementById("btnTabCloud").className = `tab-btn ${tab === 'cloud' ? 'active' : ''}`;
+  document.getElementById("btnTabKey").className = `tab-btn ${tab === 'key' ? 'active' : ''}`;
+
+  document.getElementById("adminTabBank").style.display = tab === 'bank' ? 'block' : 'none';
+  document.getElementById("adminTabConfig").style.display = tab === 'config' ? 'block' : 'none';
+  document.getElementById("adminTabCloud").style.display = tab === 'cloud' ? 'block' : 'none';
+  document.getElementById("adminTabAnswerKey").style.display = tab === 'key' ? 'block' : 'none';
+
+  if (tab === "bank") renderAdminQuestionEditor();
+  else if (tab === "config") loadConfigTab();
+  else if (tab === "cloud") loadGasConfigTab();
+  else if (tab === "key") renderAnswerKey();
+}
+
+function loadGasConfigTab() {
+  const inp = document.getElementById("cfgGasUrl");
+  if (inp) inp.value = currentData.config.gasUrl || GAS_ENDPOINT_DEFAULT;
+  document.getElementById("testGasResult").innerHTML = "";
+}
+
+function saveGasEndpoint() {
+  const val = document.getElementById("cfgGasUrl").value.trim();
+  if (!val.startsWith("https://script.google.com/")) {
+    showToast("⚠️ Đường dẫn phải bắt đầu bằng https://script.google.com/...", "warning");
+    return;
+  }
+  currentData.config.gasUrl = val;
+  saveDataToStorage();
+  showToast("✓ Đã lưu endpoint Google Apps Script thành công!", "success");
+}
+
+async function testGasEndpoint() {
+  const val = document.getElementById("cfgGasUrl").value.trim();
+  const resEl = document.getElementById("testGasResult");
+  resEl.innerHTML = `<span style="color:#2563eb;">🔄 Đang gửi dữ liệu kiểm tra tới Google Sheets...</span>`;
+
+  try {
+    const testPayload = {
+      timestamp: new Date().toLocaleString("vi-VN"),
+      studentName: "Kiểm tra kết nối",
+      studentClass: "ADMIN TEST",
+      totalScore: 10,
+      maxScore: 10,
+      correctCount: 69,
+      wrongCount: 0,
+      unansweredCount: 0,
+      duration: "00:00:10",
+      durationSeconds: 10,
+      details: { note: "Bản tin kiểm thử từ bảng điều khiển quản trị viên" }
+    };
+
+    await fetch(val, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify(testPayload),
+      mode: "no-cors"
+    });
+
+    resEl.innerHTML = `<span style="color:#16a34a; font-weight:700;">✅ Kết nối thành công! Đã gửi dòng dữ liệu mẫu vào Google Sheet của bạn.</span>`;
+    showToast("✓ Kiểm tra kết nối Google Apps Script thành công!", "success");
+  } catch (err) {
+    resEl.innerHTML = `<span style="color:#dc2626; font-weight:700;">❌ Thất bại: ${escapeHTML(err.toString())}</span>`;
+    showToast("❌ Không thể kết nối tới URL Apps Script!", "error");
+  }
+}
+
+function renderAdminQuestionEditor(keyword = "", filterType = "all") {
+  const container = document.getElementById("adminQuestionsList");
+  container.innerHTML = "";
+  const kw = keyword.trim().toLowerCase();
+
+  // Part 1
+  if (filterType === "all" || filterType === "p1") {
+    const secHead = document.createElement("h3");
+    secHead.style.cssText = "color:#1d4ed8; margin:16px 0 10px; border-bottom:1px solid #bfdbfe; padding-bottom:4px;";
+    secHead.innerText = "PHẦN I. TRẮC NGHIỆM NHIỀU PHƯƠNG ÁN LỰA CHỌN";
+    container.appendChild(secHead);
+
+    currentData.part1.forEach((q, idx) => {
+      const match = !kw || q.text.toLowerCase().includes(kw) || ("câu " + (idx+1)).includes(kw);
+      if (!match) return;
+
+      const card = document.createElement("div");
+      card.className = "editor-q-card";
+      if (!q.optionImages) q.optionImages = [null, null, null, null];
+
+      card.innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+          <strong style="color:var(--primary);">Câu ${idx + 1} (Phần I - ID: ${q.id})</strong>
+          <button type="button" class="btn btn-secondary" style="padding:4px 8px; font-size:0.8rem;" onclick="triggerImageUpload('p1', ${q.id})">🖼️ Hình ảnh câu hỏi</button>
+        </div>
+        <input type="file" id="file_p1_${q.id}" style="display:none;" accept="image/*" onchange="handleImageSelected(event, 'p1', ${q.id})">
+        <div id="imgPreview_p1_${q.id}">${q.image ? `<img src="${q.image}" style="max-height:100px; margin:6px 0; border:1px solid #ddd; border-radius:4px;"><br><button class="btn btn-danger" style="padding:2px 6px; font-size:0.75rem;" onclick="removeImage('p1', ${q.id})">Xóa ảnh</button>` : ''}</div>
+
+        <label class="editor-label">Nội dung câu hỏi:</label>
+        <textarea id="edit_p1_text_${q.id}" class="editor-textarea">${escapeHTML(q.text)}</textarea>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:8px;">
+          <div>
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <label class="editor-label" style="margin-top:0;">Đáp án A:</label>
+              <button type="button" class="btn btn-secondary" style="padding:2px 6px; font-size:0.75rem;" onclick="triggerOptImageUpload('p1', ${q.id}, 0)">🖼️ Ảnh A</button>
+            </div>
+            <input type="text" id="edit_p1_opt_${q.id}_0" class="editor-input" value="${escapeHTML(q.options[0])}" style="margin-top:4px;">
+            <input type="file" id="file_p1_${q.id}_opt_0" style="display:none;" accept="image/*" onchange="handleOptImageSelected(event, 'p1', ${q.id}, 0)">
+            <div id="imgPreview_p1_${q.id}_opt_0" style="margin-top:4px;">${q.optionImages[0] ? `<img src="${q.optionImages[0]}" style="max-height:60px; border:1px solid #ddd; border-radius:4px;"><br><button class="btn btn-danger" style="padding:1px 4px; font-size:0.7rem;" onclick="removeOptImage('p1', ${q.id}, 0)">Xóa ảnh A</button>` : ''}</div>
+          </div>
+          <div>
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <label class="editor-label" style="margin-top:0;">Đáp án B:</label>
+              <button type="button" class="btn btn-secondary" style="padding:2px 6px; font-size:0.75rem;" onclick="triggerOptImageUpload('p1', ${q.id}, 1)">🖼️ Ảnh B</button>
+            </div>
+            <input type="text" id="edit_p1_opt_${q.id}_1" class="editor-input" value="${escapeHTML(q.options[1])}" style="margin-top:4px;">
+            <input type="file" id="file_p1_${q.id}_opt_1" style="display:none;" accept="image/*" onchange="handleOptImageSelected(event, 'p1', ${q.id}, 1)">
+            <div id="imgPreview_p1_${q.id}_opt_1" style="margin-top:4px;">${q.optionImages[1] ? `<img src="${q.optionImages[1]}" style="max-height:60px; border:1px solid #ddd; border-radius:4px;"><br><button class="btn btn-danger" style="padding:1px 4px; font-size:0.7rem;" onclick="removeOptImage('p1', ${q.id}, 1)">Xóa ảnh B</button>` : ''}</div>
+          </div>
+          <div>
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <label class="editor-label" style="margin-top:0;">Đáp án C:</label>
+              <button type="button" class="btn btn-secondary" style="padding:2px 6px; font-size:0.75rem;" onclick="triggerOptImageUpload('p1', ${q.id}, 2)">🖼️ Ảnh C</button>
+            </div>
+            <input type="text" id="edit_p1_opt_${q.id}_2" class="editor-input" value="${escapeHTML(q.options[2])}" style="margin-top:4px;">
+            <input type="file" id="file_p1_${q.id}_opt_2" style="display:none;" accept="image/*" onchange="handleOptImageSelected(event, 'p1', ${q.id}, 2)">
+            <div id="imgPreview_p1_${q.id}_opt_2" style="margin-top:4px;">${q.optionImages[2] ? `<img src="${q.optionImages[2]}" style="max-height:60px; border:1px solid #ddd; border-radius:4px;"><br><button class="btn btn-danger" style="padding:1px 4px; font-size:0.7rem;" onclick="removeOptImage('p1', ${q.id}, 2)">Xóa ảnh C</button>` : ''}</div>
+          </div>
+          <div>
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <label class="editor-label" style="margin-top:0;">Đáp án D:</label>
+              <button type="button" class="btn btn-secondary" style="padding:2px 6px; font-size:0.75rem;" onclick="triggerOptImageUpload('p1', ${q.id}, 3)">🖼️ Ảnh D</button>
+            </div>
+            <input type="text" id="edit_p1_opt_${q.id}_3" class="editor-input" value="${escapeHTML(q.options[3])}" style="margin-top:4px;">
+            <input type="file" id="file_p1_${q.id}_opt_3" style="display:none;" accept="image/*" onchange="handleOptImageSelected(event, 'p1', ${q.id}, 3)">
+            <div id="imgPreview_p1_${q.id}_opt_3" style="margin-top:4px;">${q.optionImages[3] ? `<img src="${q.optionImages[3]}" style="max-height:60px; border:1px solid #ddd; border-radius:4px;"><br><button class="btn btn-danger" style="padding:1px 4px; font-size:0.7rem;" onclick="removeOptImage('p1', ${q.id}, 3)">Xóa ảnh D</button>` : ''}</div>
+          </div>
+        </div>
+
+        <div style="margin-top:12px;">
+          <label class="editor-label">Đáp án đúng (A/B/C/D):</label>
+          <select id="edit_p1_ans_${q.id}" class="editor-input" style="width:120px;">
+            <option value="A" ${q.answer === 'A' ? 'selected':''}>A</option>
+            <option value="B" ${q.answer === 'B' ? 'selected':''}>B</option>
+            <option value="C" ${q.answer === 'C' ? 'selected':''}>C</option>
+            <option value="D" ${q.answer === 'D' ? 'selected':''}>D</option>
+          </select>
+        </div>
+      `;
+      container.appendChild(card);
+    });
+  }
+
+  // Part 2
+  if (filterType === "all" || filterType === "p2") {
+    const sec2Head = document.createElement("h3");
+    sec2Head.style.cssText = "color:#1d4ed8; margin:24px 0 10px; border-bottom:1px solid #bfdbfe; padding-bottom:4px;";
+    sec2Head.innerText = "PHẦN II. TRẮC NGHIỆM ĐÚNG – SAI";
+    container.appendChild(sec2Head);
+
+    currentData.part2.forEach((q, idx) => {
+      const match = !kw || q.text.toLowerCase().includes(kw) || ("câu " + (idx+1)).includes(kw);
+      if (!match) return;
+
+      const card = document.createElement("div");
+      card.className = "editor-q-card";
+
+      let itemsEditHTML = "";
+      q.items.forEach((item, iIdx) => {
+        itemsEditHTML += `
+          <div style="display:flex; align-items:center; gap:8px; margin-top:6px;">
+            <span style="font-weight:700; width:25px;">${item.label})</span>
+            <input type="text" id="edit_p2_item_${q.id}_${iIdx}" class="editor-input" value="${escapeHTML(item.text)}" style="flex:1;">
+            <select id="edit_p2_ans_${q.id}_${iIdx}" class="editor-input" style="width:90px;">
+              <option value="true" ${item.answer === true ? 'selected':''}>Đúng</option>
+              <option value="false" ${item.answer === false ? 'selected':''}>Sai</option>
+            </select>
+          </div>
+        `;
+      });
+
+      card.innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+          <strong style="color:var(--primary);">Câu ${idx + 1} (Phần II - ID: ${q.id})</strong>
+          <button class="btn btn-secondary" style="padding:4px 8px; font-size:0.8rem;" onclick="triggerImageUpload('p2', ${q.id})">🖼️ Hình ảnh đề bài</button>
+        </div>
+        <input type="file" id="file_p2_${q.id}" style="display:none;" accept="image/*" onchange="handleImageSelected(event, 'p2', ${q.id})">
+        <div id="imgPreview_p2_${q.id}">${q.image ? `<img src="${q.image}" style="max-height:100px; margin:6px 0; border:1px solid #ddd; border-radius:4px;"><br><button class="btn btn-danger" style="padding:2px 6px; font-size:0.75rem;" onclick="removeImage('p2', ${q.id})">Xóa ảnh</button>` : ''}</div>
+
+        <label class="editor-label">Đoạn văn dẫn / Nội dung câu hỏi:</label>
+        <textarea id="edit_p2_text_${q.id}" class="editor-textarea">${escapeHTML(q.text)}</textarea>
+
+        <label class="editor-label" style="margin-top:10px;">Các ý a, b, c, d & Đáp án Đúng/Sai:</label>
+        ${itemsEditHTML}
+      `;
+      container.appendChild(card);
+    });
+  }
+
+  // Part 3
+  if (filterType === "all" || filterType === "p3") {
+    const sec3Head = document.createElement("h3");
+    sec3Head.style.cssText = "color:#1d4ed8; margin:24px 0 10px; border-bottom:1px solid #bfdbfe; padding-bottom:4px;";
+    sec3Head.innerText = "PHẦN III. CÂU HỎI TRẢ LỜI NGẮN";
+    container.appendChild(sec3Head);
+
+    currentData.part3.forEach((q, idx) => {
+      const match = !kw || q.text.toLowerCase().includes(kw) || ("câu " + (idx+1)).includes(kw);
+      if (!match) return;
+
+      const card = document.createElement("div");
+      card.className = "editor-q-card";
+      card.innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+          <strong style="color:var(--primary);">Câu ${idx + 1} (Phần III - ID: ${q.id})</strong>
+          <button class="btn btn-secondary" style="padding:4px 8px; font-size:0.8rem;" onclick="triggerImageUpload('p3', ${q.id})">🖼 Hình ảnh câu hỏi</button>
+        </div>
+        <input type="file" id="file_p3_${q.id}" style="display:none;" accept="image/*" onchange="handleImageSelected(event, 'p3', ${q.id})">
+        <div id="imgPreview_p3_${q.id}">${q.image ? `<img src="${q.image}" style="max-height:100px; margin:6px 0; border:1px solid #ddd; border-radius:4px;"><br><button class="btn btn-danger" style="padding:2px 6px; font-size:0.75rem;" onclick="removeImage('p3', ${q.id})">Xóa ảnh</button>` : ''}</div>
+
+        <label class="editor-label">Nội dung câu hỏi:</label>
+        <textarea id="edit_p3_text_${q.id}" class="editor-textarea">${escapeHTML(q.text)}</textarea>
+
+        <div style="margin-top:8px;">
+          <label class="editor-label">Đáp án đúng chuẩn:</label>
+          <input type="text" id="edit_p3_ans_${q.id}" class="editor-input" value="${escapeHTML(q.answer)}" style="max-width:300px;">
+        </div>
+      `;
+      container.appendChild(card);
+    });
+  }
+}
+
+function filterAdminQuestions() {
+  const kw = document.getElementById("adminSearchInput").value;
+  const t = document.getElementById("adminFilterType").value;
+  renderAdminQuestionEditor(kw, t);
+}
+
+function triggerImageUpload(part, qId) {
+  const inp = document.getElementById(`file_${part}_${qId}`);
+  if (inp) inp.click();
+}
+
+function handleImageSelected(e, part, qId) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(event) {
+    const base64 = event.target.result;
+    if (part === 'p1') {
+      const item = currentData.part1.find(x => x.id === qId);
+      if (item) item.image = base64;
+    } else if (part === 'p2') {
+      const item = currentData.part2.find(x => x.id === qId);
+      if (item) item.image = base64;
+    } else if (part === 'p3') {
+      const item = currentData.part3.find(x => x.id === qId);
+      if (item) item.image = base64;
+    }
+    document.getElementById(`imgPreview_${part}_${qId}`).innerHTML = `<img src="${base64}" style="max-height:100px; margin:6px 0; border:1px solid #ddd; border-radius:4px;"><br><button class="btn btn-danger" style="padding:2px 6px; font-size:0.75rem;" onclick="removeImage('${part}', ${qId})">Xóa ảnh</button>`;
+    saveDataToStorage();
+    renderWorksheet();
+  };
+  reader.readAsDataURL(file);
+}
+
+function removeImage(part, qId) {
+  if (part === 'p1') {
+    const item = currentData.part1.find(x => x.id === qId);
+    if (item) item.image = null;
+  } else if (part === 'p2') {
+    const item = currentData.part2.find(x => x.id === qId);
+    if (item) item.image = null;
+  } else if (part === 'p3') {
+    const item = currentData.part3.find(x => x.id === qId);
+    if (item) item.image = null;
+  }
+  document.getElementById(`imgPreview_${part}_${qId}`).innerHTML = "";
+  saveDataToStorage();
+  renderWorksheet();
+}
+
+function triggerOptImageUpload(part, qId, optIdx) {
+  const inp = document.getElementById(`file_${part}_${qId}_opt_${optIdx}`);
+  if (inp) inp.click();
+}
+
+function handleOptImageSelected(e, part, qId, optIdx) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(event) {
+    const base64 = event.target.result;
+    if (part === 'p1') {
+      const item = currentData.part1.find(x => x.id === qId);
+      if (item) {
+        if (!item.optionImages) item.optionImages = [null, null, null, null];
+        item.optionImages[optIdx] = base64;
+      }
+    }
+    document.getElementById(`imgPreview_${part}_${qId}_opt_${optIdx}`).innerHTML = `<img src="${base64}" style="max-height:60px; border:1px solid #ddd; border-radius:4px;"><br><button class="btn btn-danger" style="padding:1px 4px; font-size:0.7rem;" onclick="removeOptImage('${part}', ${qId}, ${optIdx})">Xóa ảnh</button>`;
+    saveDataToStorage();
+    renderWorksheet();
+  };
+  reader.readAsDataURL(file);
+}
+
+function removeOptImage(part, qId, optIdx) {
+  if (part === 'p1') {
+    const item = currentData.part1.find(x => x.id === qId);
+    if (item && item.optionImages) {
+      item.optionImages[optIdx] = null;
+    }
+  }
+  document.getElementById(`imgPreview_${part}_${qId}_opt_${optIdx}`).innerHTML = "";
+  saveDataToStorage();
+  renderWorksheet();
+}
+
+function saveAllQuestionsFromEditor() {
+  currentData.part1.forEach(q => {
+    const txt = document.getElementById(`edit_p1_text_${q.id}`);
+    if (txt) q.text = txt.value;
+    if (!q.optionImages) q.optionImages = [null, null, null, null];
+    for (let i = 0; i < 4; i++) {
+      const opt = document.getElementById(`edit_p1_opt_${q.id}_${i}`);
+      if (opt) q.options[i] = opt.value;
+    }
+    const ans = document.getElementById(`edit_p1_ans_${q.id}`);
+    if (ans) q.answer = ans.value;
+  });
+
+  currentData.part2.forEach(q => {
+    const txt = document.getElementById(`edit_p2_text_${q.id}`);
+    if (txt) q.text = txt.value;
+    q.items.forEach((item, iIdx) => {
+      const iText = document.getElementById(`edit_p2_item_${q.id}_${iIdx}`);
+      if (iText) item.text = iText.value;
+      const iAns = document.getElementById(`edit_p2_ans_${q.id}_${iIdx}`);
+      if (iAns) item.answer = iAns.value === "true";
+    });
+  });
+
+  currentData.part3.forEach(q => {
+    const txt = document.getElementById(`edit_p3_text_${q.id}`);
+    if (txt) q.text = txt.value;
+    const ans = document.getElementById(`edit_p3_ans_${q.id}`);
+    if (ans) q.answer = ans.value.trim();
+  });
+
+  saveDataToStorage();
+  renderWorksheet();
+  showToast("✓ Đã lưu thành công toàn bộ ngân hàng câu hỏi!", "success");
+}
+
+function promptRestoreOriginal() {
+  showConfirmDialog(
+    "Khôi phục câu gốc",
+    "Bạn có chắc chắn muốn khôi phục toàn bộ câu hỏi và đáp án gốc từ tài liệu ban đầu? Mọi chỉnh sửa của bạn sẽ bị thay thế.",
+    (confirmed) => {
+      if (!confirmed) return;
+      currentData = JSON.parse(JSON.stringify(ORIGINAL_DATA));
+      saveDataToStorage();
+      renderWorksheet();
+      renderAdminQuestionEditor();
+      showToast("✓ Đã khôi phục toàn bộ nội dung nguyên bản!", "success");
+    }
+  );
+}
+
+function loadConfigTab() {
+  document.getElementById("cfgSubject").value = currentData.config.subject;
+  document.getElementById("cfgGrade").value = currentData.config.grade;
+  document.getElementById("cfgTopic").value = currentData.config.topic;
+  document.getElementById("cfgTotalScore").value = currentData.config.totalScore;
+  document.getElementById("cfgNumberingMode").value = currentData.config.numberingMode || "section";
+
+  document.getElementById("cfgEnableP1").checked = currentData.config.enableP1;
+  document.getElementById("cfgScoreP1").value = currentData.config.scoreP1;
+
+  document.getElementById("cfgEnableP2").checked = currentData.config.enableP2;
+  document.getElementById("cfgScoreP2").value = currentData.config.scoreP2;
+
+  document.getElementById("cfgEnableP3").checked = currentData.config.enableP3;
+  document.getElementById("cfgScoreP3").value = currentData.config.scoreP3;
+
+  validateConfigScores();
+}
+
+function validateConfigScores() {
+  const total = parseFloat(document.getElementById("cfgTotalScore").value) || 0;
+  const p1 = parseFloat(document.getElementById("cfgScoreP1").value) || 0;
+  const p2 = parseFloat(document.getElementById("cfgScoreP2").value) || 0;
+  const p3 = parseFloat(document.getElementById("cfgScoreP3").value) || 0;
+  const sum = Math.round((p1 + p2 + p3) * 100) / 100;
+  const warnBox = document.getElementById("scoreWarningBox");
+
+  if (Math.abs(sum - total) > 0.01) {
+    warnBox.style.display = "block";
+    warnBox.innerHTML = `⚠️️ <strong>Cảnh báo phân bổ điểm:</strong> Tổng điểm các phần (${sum}) hiện không bằng Tổng điểm toàn phiếu (${total}). Vui lòng cân bằng lại trước khi lưu.`;
+  } else {
+    warnBox.style.display = "none";
+  }
+}
+
+function saveConfiguration() {
+  const total = parseFloat(document.getElementById("cfgTotalScore").value) || 10;
+  const p1 = parseFloat(document.getElementById("cfgScoreP1").value) || 0;
+  const p2 = parseFloat(document.getElementById("cfgScoreP2").value) || 0;
+  const p3 = parseFloat(document.getElementById("cfgScoreP3").value) || 0;
+  const sum = Math.round((p1 + p2 + p3) * 100) / 100;
+
+  if (Math.abs(sum - total) > 0.01) {
+    showConfirmDialog(
+      "Điểm chưa cân bằng",
+      `Tổng điểm các phần (${sum}) chưa bằng tổng điểm phiếu (${total}). Bạn có muốn tiếp tục lưu cấu hình này không?`,
+      (confirmed) => {
+        if (confirmed) applyAndSaveConfig(total, p1, p2, p3);
+      }
+    );
+  } else {
+    applyAndSaveConfig(total, p1, p2, p3);
+  }
+}
+
+function applyAndSaveConfig(total, p1, p2, p3) {
+  currentData.config.subject = document.getElementById("cfgSubject").value;
+  currentData.config.grade = document.getElementById("cfgGrade").value;
+  currentData.config.topic = document.getElementById("cfgTopic").value;
+  currentData.config.totalScore = total;
+  currentData.config.numberingMode = document.getElementById("cfgNumberingMode").value;
+
+  currentData.config.enableP1 = document.getElementById("cfgEnableP1").checked;
+  currentData.config.scoreP1 = p1;
+
+  currentData.config.enableP2 = document.getElementById("cfgEnableP2").checked;
+  currentData.config.scoreP2 = p2;
+
+  currentData.config.enableP3 = document.getElementById("cfgEnableP3").checked;
+  currentData.config.scoreP3 = p3;
+
+  saveDataToStorage();
+  renderWorksheet();
+  showToast("✓ Đã lưu cài đặt cấu hình thành công!", "success");
+}
+
+function renderAnswerKey() {
+  const container = document.getElementById("answerKeyContainer");
+  let html = `<table class="key-table"><thead><tr><th style="width:110px;">Số câu</th><th style="width:160px;">Phần</th><th>Đáp án chính xác</th></tr></thead><tbody>`;
+
+  currentData.part1.forEach((q, idx) => {
+    html += `<tr><td><strong>Câu ${idx + 1}</strong></td><td>Phần I (Trắc nghiệm)</td><td><span style="font-weight:700; color:#1d4ed8;">${q.answer}</span></td></tr>`;
+  });
+
+  currentData.part2.forEach((q, idx) => {
+    const tfAnswers = q.items.map(i => `${i.label}: <strong>${i.answer ? 'Đúng' : 'Sai'}</strong>`).join(" | ");
+    html += `<tr><td><strong>Câu ${idx + 1}</strong></td><td>Phần II (Đúng – Sai)</td><td>${tfAnswers}</td></tr>`;
+  });
+
+  currentData.part3.forEach((q, idx) => {
+    html += `<tr><td><strong>Câu ${idx + 1}</strong></td><td>Phần III (Trả lời ngắn)</td><td><span style="font-weight:700; color:#15803d;">${q.answer}</span></td></tr>`;
+  });
+
+  html += `</tbody></table>`;
+  container.innerHTML = html;
+}
+
+function escapeHTML(str) {
+  if (!str) return "";
+  return str.replace(/[&<>'"]/g, tag => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+  }[tag] || tag));
+}
+
+// Initial application boot
+window.addEventListener("DOMContentLoaded", () => {
+  initData();
+  renderWorksheet();
+});
+</script>
+</body>
+</html>
